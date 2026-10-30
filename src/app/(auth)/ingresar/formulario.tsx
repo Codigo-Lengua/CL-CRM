@@ -32,10 +32,7 @@ export function FormularioIngreso({ destino }: { destino: string }) {
       <Campo etiqueta="Contraseña" id="contrasena" type="password" autoComplete="current-password" required />
       <Aviso>{error}</Aviso>
       <Boton cargando={cargando}>Ingresar</Boton>
-      <Link
-        href="/recuperar"
-        className="text-center text-sm text-violet-700 hover:underline dark:text-violet-300"
-      >
+      <Link href="/recuperar" className="text-center text-sm text-enlace hover:underline">
         Olvidé mi contraseña
       </Link>
     </form>

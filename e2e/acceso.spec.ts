@@ -62,7 +62,7 @@ test("el ADMIN debe activar dos pasos antes de trabajar", async () => {
   await expect(
     admin.getByRole("heading", { name: "Hola, Admin E2E" }).filter({ visible: true }),
   ).toBeVisible();
-  await expect(admin.getByText("Ingresaste con el rol ADMIN").filter({ visible: true })).toBeVisible();
+  await expect(admin.getByText("Ingresaste como Administrador.").filter({ visible: true })).toBeVisible();
 });
 
 test("al volver a ingresar pide el código de la app", async () => {
@@ -113,10 +113,10 @@ test("la invitada crea su cuenta, entra como Asesor y no puede administrar el eq
   await expect(
     invitada.getByRole("heading", { name: `Hola, ${datos.invitada.nombre}` }).filter({ visible: true }),
   ).toBeVisible();
-  await expect(invitada.getByText("Ingresaste con el rol ASESOR").filter({ visible: true })).toBeVisible();
+  await expect(invitada.getByText("Ingresaste como Asesor.").filter({ visible: true })).toBeVisible();
 
   await invitada.goto("/configuracion/equipo");
-  await expect(invitada.locator("p[role=alert]").filter({ visible: true })).toHaveText(
+  await expect(invitada.getByRole("alert").filter({ hasText: "Solo un administrador" })).toHaveText(
     "Solo un administrador puede gestionar el equipo.",
   );
 

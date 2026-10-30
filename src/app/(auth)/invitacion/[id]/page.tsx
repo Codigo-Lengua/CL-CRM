@@ -29,10 +29,7 @@ async function Invitacion({ params }: Pick<PageProps<"/invitacion/[id]">, "param
         <Aviso>
           La invitación venció, ya se usó o fue cancelada. Pide a un administrador que te invite de nuevo.
         </Aviso>
-        <Link
-          href="/ingresar"
-          className="text-center text-sm text-violet-700 hover:underline dark:text-violet-300"
-        >
+        <Link href="/ingresar" className="text-center text-sm text-enlace hover:underline">
           Ir a ingresar
         </Link>
       </>

@@ -13,7 +13,7 @@ export function BotonSalir() {
           navegarConRecarga("/ingresar");
         })()
       }
-      className="text-sm text-violet-700 hover:underline dark:text-violet-300"
+      className="rounded-md px-2 py-1 text-sm text-enlace hover:bg-superficie-alta"
     >
       Cerrar sesión
     </button>

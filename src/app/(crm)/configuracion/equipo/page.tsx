@@ -1,5 +1,6 @@
 import { type Metadata } from "next";
 import { Suspense } from "react";
+import { Cargando, EncabezadoPagina, SinPermiso } from "@/components/ui";
 import { exigirSesion } from "@/lib/auth/sesion";
 import { dbPlataforma } from "@/lib/db";
 import { puede, ROLES } from "@/lib/permisos";
@@ -12,7 +13,7 @@ async function Equipo() {
   // cliente de plataforma, así que el filtro por organización va explícito.
   const { organizacionId, miembroId, rol } = await exigirSesion();
   if (!puede(rol, "configuracion.administrar")) {
-    return <p role="alert">Solo un administrador puede gestionar el equipo.</p>;
+    return <SinPermiso texto="Solo un administrador puede gestionar el equipo." />;
   }
   const datos = await (async () => {
     const plataforma = dbPlataforma();
@@ -59,14 +60,12 @@ async function Equipo() {
 
 export default function PaginaEquipo() {
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Equipo</h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Invita personas, cambia su rol o quítales el acceso. Los cambios quedan en la auditoría.
-        </p>
-      </header>
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+    <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-6">
+      <EncabezadoPagina
+        titulo="Equipo"
+        detalle="Invita personas, cambia su rol o quítales el acceso. Los cambios quedan en la auditoría."
+      />
+      <Suspense fallback={<Cargando />}>
         <Equipo />
       </Suspense>
     </main>

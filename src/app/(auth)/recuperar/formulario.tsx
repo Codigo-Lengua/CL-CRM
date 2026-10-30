@@ -26,7 +26,7 @@ export function FormularioRecuperar() {
 
   if (enviado) {
     return (
-      <Aviso tipo="ok">
+      <Aviso tono="ok">
         Si el correo está registrado, te llegará un enlace para crear una contraseña nueva. Vence en una hora.
       </Aviso>
     );
@@ -36,10 +36,7 @@ export function FormularioRecuperar() {
       <Campo etiqueta="Correo" id="email" type="email" autoComplete="email" required autoFocus />
       <Aviso>{error}</Aviso>
       <Boton cargando={cargando}>Enviar enlace</Boton>
-      <Link
-        href="/ingresar"
-        className="text-center text-sm text-violet-700 hover:underline dark:text-violet-300"
-      >
+      <Link href="/ingresar" className="text-center text-sm text-enlace hover:underline">
         Volver a ingresar
       </Link>
     </form>

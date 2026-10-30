@@ -12,10 +12,7 @@ async function Contenido({ searchParams }: Pick<PageProps<"/restablecer">, "sear
   return (
     <>
       <Aviso>El enlace no es válido o venció.</Aviso>
-      <Link
-        href="/recuperar"
-        className="text-center text-sm text-violet-700 hover:underline dark:text-violet-300"
-      >
+      <Link href="/recuperar" className="text-center text-sm text-enlace hover:underline">
         Pedir otro enlace
       </Link>
     </>

@@ -27,6 +27,8 @@ model PerfilOrganizacion {
   prefijoCotizacion String?            @map("prefijo_cotizacion")
   planSuscripcion   String?            @map("plan_suscripcion")
   estado            EstadoOrganizacion @default(ACTIVA)
+  /// Colores, fuentes, logos y nombre comercial (src/modules/marca). Vacío usa el tema por defecto.
+  marca             Json?
   creadoEn          DateTime           @default(now()) @map("creado_en")
   actualizadoEn     DateTime           @updatedAt @map("actualizado_en")
 

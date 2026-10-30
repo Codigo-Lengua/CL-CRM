@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { BotonEnlace } from "@/components/ui/boton";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authCliente } from "@/lib/auth/cliente";
@@ -62,7 +62,7 @@ export function AceptarInvitacion({ invitacion }: { invitacion: DatosInvitacion 
               router.refresh();
             })()
           }
-          className="text-sm text-violet-700 hover:underline dark:text-violet-300"
+          className="text-sm text-enlace hover:underline"
         >
           Cerrar sesión y continuar
         </button>
@@ -88,12 +88,9 @@ export function AceptarInvitacion({ invitacion }: { invitacion: DatosInvitacion 
 
   if (invitacion.cuentaExiste) {
     return (
-      <Link
-        href={`/ingresar?destino=/invitacion/${invitacion.id}`}
-        className="rounded-md bg-violet-600 px-4 py-2 text-center font-medium text-white hover:bg-violet-700"
-      >
+      <BotonEnlace href={`/ingresar?destino=/invitacion/${invitacion.id}`}>
         Ingresa para aceptarla
-      </Link>
+      </BotonEnlace>
     );
   }
 
