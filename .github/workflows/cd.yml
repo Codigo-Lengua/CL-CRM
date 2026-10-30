@@ -1,0 +1,73 @@
+name: CD
+
+# Corre al fusionar el PR de dev a main (docs/flujo-de-trabajo.md §7).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ignorar_ventana:
+        description: "Desplegar fuera de la ventana (solo hotfix aprobado)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: despliegue-produccion
+  cancel-in-progress: false
+
+jobs:
+  imagen:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      imagen: ${{ steps.nombre.outputs.imagen }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: nombre
+        run: echo "imagen=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.nombre.outputs.imagen }}
+            ghcr.io/${{ github.repository_owner }}/cl-crm:production
+
+  desplegar:
+    needs: imagen
+    if: vars.DESPLIEGUE_ACTIVO == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Revisar ventana de despliegue
+        if: ${{ !inputs.ignorar_ventana }}
+        run: npm run ventana-despliegue
+      - name: Desplegar en Coolify
+        env:
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK_PRODUCTION }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: curl -sSf -X GET "$COOLIFY_WEBHOOK" -H "Authorization: Bearer $COOLIFY_TOKEN"
+      - name: Verificar /api/health
+        run: |
+          for intento in $(seq 1 18); do
+            if curl -sSf https://crm.codigolengua.com/api/health > /dev/null; then
+              echo "Desplegado ${{ needs.imagen.outputs.imagen }}" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::/api/health no respondió en 3 minutos"
+          exit 1

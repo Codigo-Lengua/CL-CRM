@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Imagen Docker liviana: solo el servidor y las dependencias que usa.
+  output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

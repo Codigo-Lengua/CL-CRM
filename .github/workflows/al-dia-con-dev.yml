@@ -1,0 +1,25 @@
+name: Al día con dev
+
+# Verificación liviana (sin pruebas): bloquea la fusión de un PR que quedó atrás de dev.
+on:
+  pull_request:
+    branches: [dev]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  al-dia-con-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Comparar con dev
+        run: |
+          git fetch origin dev
+          if git merge-base --is-ancestor origin/dev HEAD; then
+            echo "La rama contiene el último dev."
+          else
+            echo "::error::La rama está atrás de dev. Actualízala (Update branch) antes de fusionar."
+            exit 1
+          fi
