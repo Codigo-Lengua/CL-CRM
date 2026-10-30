@@ -1,0 +1,51 @@
+name: Nombre de rama
+
+# Toda rama de trabajo se llama <tipo>/<idIssue>-<descripcion>/<agente>
+# (docs/flujo-de-trabajo.md §1) y su PR cierra esa issue.
+on:
+  pull_request:
+    branches: [dev, main]
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  issues: read
+  pull-requests: read
+
+jobs:
+  nombre-de-rama:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const rama = pr.head.ref;
+            // El PR de dev a main no es una rama de trabajo.
+            if (rama === "dev" && pr.base.ref === "main") return core.info("PR de dev a main: no aplica.");
+
+            const formato = /^(feat|fix|hotfix|docs|diseno|ci)\/(\d+)-[a-z0-9]+(?:-[a-z0-9]+)*\/(plataforma|comercial|cotizacion|reparto)$/;
+            const m = rama.match(formato);
+            if (!m) {
+              return core.setFailed(
+                `La rama "${rama}" no cumple <tipo>/<idIssue>-<descripcion>/<agente>. ` +
+                  "Ejemplo: feat/18-reparto-rotacion-equitativa/reparto",
+              );
+            }
+            const [, tipo, id] = m;
+            if (pr.base.ref === "main" && tipo !== "hotfix") {
+              return core.setFailed("Solo las ramas hotfix/ van directo a main.");
+            }
+
+            let issue;
+            try {
+              ({ data: issue } = await github.rest.issues.get({ ...context.repo, issue_number: Number(id) }));
+            } catch {
+              return core.setFailed(`La issue #${id} no existe.`);
+            }
+            if (issue.pull_request) return core.setFailed(`#${id} es un PR, no una issue.`);
+
+            const cierra = new RegExp(`(cierra|closes|fixes|resuelve)\\s+#${id}\\b`, "i");
+            if (!cierra.test(pr.body ?? "")) {
+              return core.setFailed(`El cuerpo del PR debe tener "Cierra #${id}" en la sección Issue.`);
+            }
+            core.info(`Rama válida: ${tipo}, issue #${id} (${issue.title}).`);

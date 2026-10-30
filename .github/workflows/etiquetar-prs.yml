@@ -19,7 +19,7 @@ jobs:
           script: |
             const rama = context.payload.pull_request.head.ref;
             const etiquetas = {
-              "feature/": "mejora",
+              "feat/": "mejora",
               "fix/": "bug",
               "hotfix/": "bug",
               "docs/": "documentacion",

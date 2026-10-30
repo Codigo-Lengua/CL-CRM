@@ -9,28 +9,43 @@
 Todo el trabajo sale de `dev` y vuelve a `dev` por pull request. Cuando un conjunto de cambios está listo, se abre un PR de `dev` a `main`: **solo ese PR corre la integración continua**, y al fusionarlo corre el despliegue.
 
 ```
-dev ──▶ feature/… ──PR (squash)──▶ dev ──PR dev → main (CI)──▶ main ──CD──▶ producción
+dev ──▶ feat/<id>-…/<agente> ──PR (squash)──▶ dev ──PR dev → main (CI)──▶ main ──CD──▶ producción
           │                         │
           etiqueta automática       cada fusión actualiza los PR abiertos contra dev
 ```
 
 ## 1. Ramas
 
-| Rama                             | Para qué                                                            | Sale de | Se fusiona en        |
-| -------------------------------- | ------------------------------------------------------------------- | ------- | -------------------- |
-| `main`                           | Lo que está en producción                                           | —       | —                    |
-| `dev`                            | Integración del trabajo terminado; rama por defecto del repositorio | `main`  | `main`, solo por PR  |
-| `feature/<modulo>-<descripcion>` | Funcionalidad nueva                                                 | `dev`   | `dev`                |
-| `fix/<modulo>-<descripcion>`     | Corrección                                                          | `dev`   | `dev`                |
-| `docs/<descripcion>`             | Documentación                                                       | `dev`   | `dev`                |
-| `diseno/<descripcion>`           | Pantallas, estilos, componentes visuales                            | `dev`   | `dev`                |
-| `ci/<descripcion>`               | Integración continua, despliegue y herramientas del repositorio     | `dev`   | `dev`                |
-| `hotfix/<descripcion>`           | Corrección urgente de producción (sección 7)                        | `main`  | `main` y luego `dev` |
+Formato de toda rama de trabajo:
+
+```
+<tipo>/<idIssue>-<descripcion>/<agente>
+```
+
+| Parte         | Valores                                                                      | Ejemplo                       |
+| ------------- | ---------------------------------------------------------------------------- | ----------------------------- |
+| `tipo`        | `feat`, `fix`, `hotfix`, `docs`, `diseno`, `ci`                              | `feat`                        |
+| `idIssue`     | Número de la issue que resuelve; toda rama tiene issue                       | `18`                          |
+| `descripcion` | Minúscula, en español, con guiones                                           | `reparto-rotacion-equitativa` |
+| `agente`      | Línea dueña (sección 10): `plataforma`, `comercial`, `cotizacion`, `reparto` | `reparto`                     |
+
+Ejemplo completo: `feat/18-reparto-rotacion-equitativa/reparto`.
+
+| Rama                                 | Para qué                                                            | Sale de | Se fusiona en        |
+| ------------------------------------ | ------------------------------------------------------------------- | ------- | -------------------- |
+| `main`                               | Lo que está en producción                                           | —       | —                    |
+| `dev`                                | Integración del trabajo terminado; rama por defecto del repositorio | `main`  | `main`, solo por PR  |
+| `feat/<id>-<descripcion>/<agente>`   | Funcionalidad nueva                                                 | `dev`   | `dev`                |
+| `fix/<id>-<descripcion>/<agente>`    | Corrección                                                          | `dev`   | `dev`                |
+| `docs/<id>-<descripcion>/<agente>`   | Documentación                                                       | `dev`   | `dev`                |
+| `diseno/<id>-<descripcion>/<agente>` | Pantallas, estilos, componentes visuales                            | `dev`   | `dev`                |
+| `ci/<id>-<descripcion>/<agente>`     | Integración continua, despliegue y herramientas del repositorio     | `dev`   | `dev`                |
+| `hotfix/<id>-<descripcion>/<agente>` | Corrección urgente de producción (sección 7)                        | `main`  | `main` y luego `dev` |
 
 Reglas:
 
-- Nombres en minúscula, en español y con guiones: `feature/reparto-rotacion-equitativa`.
-- Una issue, una rama, un pull request. La rama lleva el número de la issue al final cuando existe: `feature/reparto-rotacion-12`.
+- La verificación `nombre-de-rama` falla en el PR si el nombre no cumple el formato, si la issue no existe o si el cuerpo del PR no tiene `Cierra #<idIssue>`.
+- Una issue, una rama, un pull request. Si un cambio no tiene issue, primero se crea la issue.
 - Nadie empuja directo a `dev` ni a `main`.
 - La rama se borra al fusionar.
 
@@ -81,7 +96,7 @@ Ejemplos: `feat(reparto): Agregar rotación equitativa entre asesores elegibles`
 
 | Etiqueta        | Cuándo                                           | Asignación automática por rama |
 | --------------- | ------------------------------------------------ | ------------------------------ |
-| `mejora`        | Funcionalidad nueva o mejora de una existente    | `feature/`                     |
+| `mejora`        | Funcionalidad nueva o mejora de una existente    | `feat/`                        |
 | `bug`           | Corrección de un error                           | `fix/`, `hotfix/`              |
 | `documentacion` | Solo documentación                               | `docs/`                        |
 | `diseno`        | Pantallas, estilos, componentes visuales         | `diseno/`                      |
@@ -118,7 +133,7 @@ Corre **solo** en los PR de `dev` a `main`. Ningún paso se puede saltar para fu
 | Migraciones          | Se aplican con `prisma migrate deploy` sobre PostgreSQL limpio           | Activo                                    |
 | Integración          | Pruebas `*.int.test.ts` contra PostgreSQL (aislamiento por organización) | Activo                                    |
 | Fronteras de módulos | Ningún módulo importa el interior de otro                                | Con el segundo módulo con infraestructura |
-| Flujos completos     | Playwright sobre PostgreSQL de prueba                                    | Corte 2                                   |
+| Flujos completos     | Playwright sobre el build y PostgreSQL de prueba (`npm run test:e2e`)    | Activo                                    |
 | Contrato de la API   | oasdiff contra la versión publicada                                      | Etapa 2                                   |
 
 **Estilo y formato.** Prettier (con `prettier-plugin-tailwindcss`, que ordena las clases) da el formato y ESLint revisa el código: la configuración de Next, reglas de `typescript-eslint` que usan los tipos (promesas sin `await`, `switch` incompletos, imports de tipos) y `eslint-config-prettier` para que no choquen. `.editorconfig` fija UTF-8, LF y dos espacios. Husky corre `lint-staged` antes de cada commit: formatea y revisa solo los archivos que cambian. `npm run format` formatea todo el repositorio.
@@ -145,7 +160,7 @@ Mientras Coolify no esté configurado, el paso 5 queda apagado con la variable d
 
 ### Hotfix
 
-1. Rama `hotfix/<descripcion>` desde `main`; PR contra `main` (excepción a la regla de origen, marcada con la etiqueta `bug` y el prefijo `hotfix/`).
+1. Rama `hotfix/<id>-<descripcion>/<agente>` desde `main`; PR contra `main` (excepción a la regla de origen, marcada con la etiqueta `bug` y el prefijo `hotfix/`).
 2. Corre la CI completa y el despliegue con aprobación.
 3. Inmediatamente después, PR de `main` a `dev` para que `dev` no pierda la corrección.
 
@@ -185,21 +200,21 @@ Orden dentro de cada línea: el de los números de issue. Cada issue dice de qu�
 
 ## 11. Configuración de GitHub
 
-| Ajuste                   | Valor                                                                               |
-| ------------------------ | ----------------------------------------------------------------------------------- |
-| Rama por defecto         | `dev`                                                                               |
-| Protección de `dev`      | Solo por PR; verificación `al-dia-con-dev` obligatoria y estricta; historial lineal |
-| Protección de `main`     | Solo por PR; verificaciones `origen-dev`, `verificar` y `secretos` obligatorias     |
-| Fusiones permitidas      | Squash (hacia `dev`) y merge commit (de `dev` a `main`)                             |
-| Borrar ramas al fusionar | Activado                                                                            |
-| Ambiente `production`    | Revisor obligatorio: Camilo; secreto `COOLIFY_WEBHOOK_PRODUCTION` y `COOLIFY_TOKEN` |
+| Ajuste                   | Valor                                                                                                     |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Rama por defecto         | `dev`                                                                                                     |
+| Protección de `dev`      | Solo por PR; verificaciones `al-dia-con-dev` (estricta) y `nombre-de-rama` obligatorias; historial lineal |
+| Protección de `main`     | Solo por PR; verificaciones `origen-dev`, `verificar` y `secretos` obligatorias                           |
+| Fusiones permitidas      | Squash (hacia `dev`) y merge commit (de `dev` a `main`)                                                   |
+| Borrar ramas al fusionar | Activado                                                                                                  |
+| Ambiente `production`    | Revisor obligatorio: Camilo; secreto `COOLIFY_WEBHOOK_PRODUCTION` y `COOLIFY_TOKEN`                       |
 
 Los secretos de la aplicación viven solo en Coolify y en el gestor de contraseñas.
 
 ## 12. Día a día
 
 1. `git switch dev && git pull`
-2. `git switch -c feature/<modulo>-<descripcion>-<issue>`
+2. `git switch -c feat/<idIssue>-<descripcion>/<agente>`
 3. Programar con pruebas; antes de subir: `npm run format:check && npm run lint && npm run typecheck && npm test`.
 4. `git push -u origin <rama>` y abrir el PR contra `dev` con la plantilla.
 5. Revisión → **Squash and merge**.
