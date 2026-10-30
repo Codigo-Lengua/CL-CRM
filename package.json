@@ -18,7 +18,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "alta-organizacion": "tsx scripts/alta-organizacion.ts"
+    "alta-organizacion": "tsx scripts/alta-organizacion.ts",
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

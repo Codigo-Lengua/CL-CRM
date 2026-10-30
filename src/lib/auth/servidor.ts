@@ -5,6 +5,7 @@ import { nextCookies } from "better-auth/next-js";
 import { admin, organization, twoFactor } from "better-auth/plugins";
 import { adminAc, userAc } from "better-auth/plugins/admin/access";
 import { conOrganizacion, db, dbPlataforma } from "@/lib/db";
+import { aplicarPlantilla } from "@/modules/parametros/infraestructura/prisma";
 import { registroDeAuditoria, seAudita } from "./auditoria-auth";
 import { type ConfigAuth, leerConfigAuth } from "./config";
 import { controlAcceso, rolesOrganizacion } from "./control-acceso";
@@ -143,7 +144,11 @@ export function crearAuth({ config, correo }: DependenciasAuth) {
         },
         organizationHooks: {
           async afterCreateOrganization({ organization: org, member }) {
-            await conOrganizacion(org.id, () => db().perfilOrganizacion.create({ data: {} }));
+            // Perfil y plantilla de parámetros (RN-01): la organización nace configurada.
+            await conOrganizacion(org.id, async () => {
+              await db().perfilOrganizacion.create({ data: {} });
+              await aplicarPlantilla();
+            });
             await crearPerfilComercial(org.id, member.id, member.userId);
           },
           async afterAddMember({ member, organization: org }) {

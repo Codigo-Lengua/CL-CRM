@@ -95,6 +95,10 @@ model Organization {
   perfilOrganizacion  PerfilOrganizacion?
   perfilesComerciales PerfilComercial[]
   auditorias          Auditoria[]
+  configuraciones     Configuracion[]
+  valoresCatalogo     ValorCatalogo[]
+  canalesEnvio        CanalEnvio[]
+  festivos            Festivo[]
 
   @@unique([slug])
   @@map("organization")

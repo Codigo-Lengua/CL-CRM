@@ -28,7 +28,7 @@ const eslintConfig = defineConfig([
     },
   },
   // Los scripts de consola sí imprimen.
-  { files: ["scripts/**"], rules: { "no-console": "off" } },
+  { files: ["scripts/**", "prisma/seed.ts"], rules: { "no-console": "off" } },
   // Prettier se encarga del formato; apaga las reglas de estilo que chocarían.
   prettier,
   globalIgnores([

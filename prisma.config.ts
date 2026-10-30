@@ -6,6 +6,7 @@ export default defineConfig({
   schema: "prisma/schema",
   migrations: {
     path: "prisma/migrations",
+    seed: "tsx prisma/seed.ts",
   },
   // `prisma generate` no necesita base de datos (build de Docker y npm ci); migrar sí.
   datasource: {

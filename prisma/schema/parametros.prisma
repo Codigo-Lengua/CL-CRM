@@ -1,0 +1,107 @@
+// Parámetros y diccionarios de cada organización (CL-CRM-04 §4.1 y §5, RN-01).
+// Los valores por defecto viven en src/modules/parametros/dominio/plantilla-codigo-lengua.ts
+// y se copian a estas tablas al crear la organización.
+
+enum TipoParametro {
+  NUMERO
+  TEXTO
+  BOOLEANO
+  HORARIO
+  JSON
+}
+
+enum EditablePor {
+  ADMIN
+  PLATAFORMA
+}
+
+enum TipoCatalogo {
+  CATEGORIA_EMPRESA
+  FUENTE_LEAD
+  MOTIVO_PERDIDA
+  RESULTADO_ACTIVIDAD
+  LINEA_SERVICIO
+  MOTIVO_DEVOLUCION
+  TIPO_SOLICITUD_DATOS
+}
+
+enum Canal {
+  WHATSAPP
+  CORREO
+  ASESOR
+}
+
+/// Parámetros sueltos de la organización.
+model Configuracion {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizacionId String        @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion   Organization  @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  clave          String
+  valor          Json
+  tipo           TipoParametro
+  descripcion    String
+  editablePor    EditablePor   @default(ADMIN) @map("editable_por")
+  creadoEn       DateTime      @default(now()) @map("creado_en")
+  actualizadoEn  DateTime      @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, clave])
+  @@map("configuracion")
+}
+
+/// Diccionarios de la organización: categorías, fuentes, motivos y resultados.
+model ValorCatalogo {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizacionId String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion   Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  tipo           TipoCatalogo
+  codigo         String
+  etiqueta       String
+  orden          Int          @default(0)
+  activo         Boolean      @default(true)
+  /// El código depende de este valor: no se puede borrar ni cambiar su código.
+  esSistema      Boolean      @default(false) @map("es_sistema")
+  /// Significado adicional, por ejemplo {"contacto_efectivo": true}.
+  atributos      Json?
+  creadoEn       DateTime     @default(now()) @map("creado_en")
+  actualizadoEn  DateTime     @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, tipo, codigo])
+  @@unique([organizacionId, id])
+  @@map("valor_catalogo")
+}
+
+/// Interruptores y orden de la cascada de envío de cotizaciones.
+model CanalEnvio {
+  id                 String       @id @default(uuid()) @db.Uuid
+  organizacionId     String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion       Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  canal              Canal
+  activo             Boolean      @default(true)
+  /// Orden en la cascada; 1 va primero.
+  prioridad          Int
+  reintentos         Int          @default(0)
+  /// Plantilla de WhatsApp aprobada o asunto del correo.
+  plantilla          String?
+  visibleEnCotizador Boolean      @default(true) @map("visible_en_cotizador")
+  /// user.id del último cambio. Sin relación: user es tabla de plataforma.
+  actualizadoPorId   String?      @map("actualizado_por") @db.Uuid
+  creadoEn           DateTime     @default(now()) @map("creado_en")
+  actualizadoEn      DateTime     @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, canal])
+  @@map("canal_envio")
+}
+
+/// Festivos propios de la organización. Los nacionales de Colombia se calculan (D-18).
+model Festivo {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizacionId String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion   Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  fecha          DateTime     @db.Date
+  nombre         String
+  creadoEn       DateTime     @default(now()) @map("creado_en")
+  actualizadoEn  DateTime     @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, fecha])
+  @@map("festivo")
+}

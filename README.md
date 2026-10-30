@@ -29,16 +29,17 @@ No hay registro abierto: la primera organización y su ADMIN se crean con `alta-
 
 ## Comandos
 
-| Comando                      | Qué hace                                        |
-| ---------------------------- | ----------------------------------------------- |
-| `npm run dev`                | Servidor de desarrollo en http://localhost:3000 |
-| `npm test`                   | Pruebas de las reglas de negocio (Vitest)       |
-| `npm run test:integracion`   | Pruebas contra PostgreSQL (aislamiento, login)  |
-| `npm run alta-organizacion`  | Crea una organización con su primer ADMIN       |
-| `npm run typecheck`          | Revisión de tipos                               |
-| `npm run lint`               | Revisión de estilo                              |
-| `npm run build`              | Compila la versión de producción                |
-| `npm run ventana-despliegue` | Indica si ahora se puede desplegar a producción |
+| Comando                      | Qué hace                                                             |
+| ---------------------------- | -------------------------------------------------------------------- |
+| `npm run dev`                | Servidor de desarrollo en http://localhost:3000                      |
+| `npm test`                   | Pruebas de las reglas de negocio (Vitest)                            |
+| `npm run test:integracion`   | Pruebas contra PostgreSQL (aislamiento, login)                       |
+| `npm run alta-organizacion`  | Crea una organización con su primer ADMIN                            |
+| `npm run seed`               | Completa la plantilla de parámetros en las organizaciones existentes |
+| `npm run typecheck`          | Revisión de tipos                                                    |
+| `npm run lint`               | Revisión de estilo                                                   |
+| `npm run build`              | Compila la versión de producción                                     |
+| `npm run ventana-despliegue` | Indica si ahora se puede desplegar a producción                      |
 
 ## Estructura
 
