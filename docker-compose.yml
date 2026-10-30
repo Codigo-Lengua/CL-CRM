@@ -1,0 +1,15 @@
+# PostgreSQL local para desarrollo (CL-CRM-06 §3): docker compose up -d db
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: crm
+      POSTGRES_PASSWORD: crm
+      POSTGRES_DB: crm
+    ports:
+      - "5432:5432"
+    volumes:
+      - datos-crm:/var/lib/postgresql/data
+
+volumes:
+  datos-crm:
