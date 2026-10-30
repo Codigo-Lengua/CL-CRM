@@ -1,16 +1,150 @@
-// Tablas de Better Auth (CL-CRM-03 §5). Este archivo lo regenera el CLI de Better Auth
-// en la issue #4; aquí solo está organization, que necesita el aislamiento por organización.
-// No se les agregan columnas: los datos del CRM van en tablas 1 a 1.
+// Tablas de Better Auth (CL-CRM-03 §5), generadas con su CLI:
+//   npx auth generate --config src/lib/auth/cli.ts --output prisma/schema/auth.prisma
+// Conservan sus nombres en inglés y el CRM no les agrega columnas: sus datos van en
+// perfiles.prisma (tablas 1 a 1). Solo se agregan a mano, marcadas con "// CRM:",
+// las relaciones inversas que Prisma exige y el único (organizationId, userId) de member.
+// Al regenerar, `prisma validate` falla si falta alguna de ellas. También se cambia
+// `pg_catalog.gen_random_uuid()` por `gen_random_uuid()`, que es como PostgreSQL lo guarda;
+// si no, cada `migrate dev` propone cambiar los defaults.
+
+model User {
+  id                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String
+  email               String
+  emailVerified       Boolean           @default(false)
+  image               String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  twoFactorEnabled    Boolean?          @default(false)
+  role                String?
+  banned              Boolean?          @default(false)
+  banReason           String?
+  banExpires          DateTime?
+  sessions            Session[]
+  accounts            Account[]
+  members             Member[]
+  invitations         Invitation[]
+  twofactors          TwoFactor[]
+  // CRM: relaciones inversas (ver encabezado).
+  perfilesComerciales PerfilComercial[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  expiresAt            DateTime
+  token                String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String   @db.Uuid
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
+  impersonatedBy       String?
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  accountId             String
+  providerId            String
+  userId                String    @db.Uuid
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
 
 model Organization {
-  id        String   @id
-  name      String
-  slug      String   @unique
-  logo      String?
-  metadata  String?
-  createdAt DateTime @default(now())
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String
+  slug                String
+  logo                String?
+  createdAt           DateTime
+  metadata            String?
+  members             Member[]
+  invitations         Invitation[]
+  // CRM: relaciones inversas (ver encabezado).
+  perfilOrganizacion  PerfilOrganizacion?
+  perfilesComerciales PerfilComercial[]
+  auditorias          Auditoria[]
 
-  auditorias Auditoria[]
-
+  @@unique([slug])
   @@map("organization")
+}
+
+model Member {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String           @db.Uuid
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId          String           @db.Uuid
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            String           @default("member")
+  createdAt       DateTime
+  // CRM: relación inversa y unicidad de CL-CRM-04 §3 (ver encabezado).
+  perfilComercial PerfilComercial?
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String       @db.Uuid
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitation")
+}
+
+model TwoFactor {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  secret                  String
+  backupCodes             String
+  userId                  String    @db.Uuid
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0)
+  lockedUntil             DateTime?
+
+  @@index([secret])
+  @@index([userId])
+  @@map("twoFactor")
 }

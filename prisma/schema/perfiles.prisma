@@ -1,0 +1,59 @@
+// Datos del CRM ligados 1 a 1 a las tablas de Better Auth (CL-CRM-04 §4.1).
+
+enum EstadoOrganizacion {
+  ACTIVA
+  SUSPENDIDA
+  CERRADA
+}
+
+enum Disponibilidad {
+  DISPONIBLE
+  EN_PAUSA
+  AUSENTE
+  FUERA_DE_TURNO
+}
+
+/// Datos del CRM de cada organización, 1 a 1 con organization.
+model PerfilOrganizacion {
+  id                String             @id @default(uuid()) @db.Uuid
+  organizacionId    String             @unique @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion      Organization       @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  nit               String?
+  razonSocial       String?            @map("razon_social")
+  sector            String?
+  pais              String             @default("CO")
+  zonaHoraria       String             @default("America/Bogota") @map("zona_horaria")
+  moneda            String             @default("COP")
+  prefijoCotizacion String?            @map("prefijo_cotizacion")
+  planSuscripcion   String?            @map("plan_suscripcion")
+  estado            EstadoOrganizacion @default(ACTIVA)
+  creadoEn          DateTime           @default(now()) @map("creado_en")
+  actualizadoEn     DateTime           @updatedAt @map("actualizado_en")
+
+  @@map("perfil_organizacion")
+}
+
+/// Datos comerciales de un miembro, 1 a 1 con member.
+model PerfilComercial {
+  id                  String         @id @default(uuid()) @db.Uuid
+  organizacionId      String         @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion        Organization   @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  miembroId           String         @unique @map("miembro_id") @db.Uuid
+  miembro             Member         @relation(fields: [miembroId], references: [id], onDelete: Cascade)
+  usuarioId           String         @map("usuario_id") @db.Uuid
+  usuario             User           @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  disponibilidad      Disponibilidad @default(FUERA_DE_TURNO)
+  disponibilidadDesde DateTime       @default(now()) @map("disponibilidad_desde")
+  recibeLeads         Boolean        @default(false) @map("recibe_leads")
+  /// Máximo de negocios abiertos; vacío usa el parámetro general.
+  capacidadNegocios   Int?           @map("capacidad_negocios")
+  ultimoLeadEn        DateTime?      @map("ultimo_lead_en")
+  esRespaldo          Boolean        @default(false) @map("es_respaldo")
+  esGuardia           Boolean        @default(false) @map("es_guardia")
+  telefonoCorporativo String?        @map("telefono_corporativo")
+  creadoEn            DateTime       @default(now()) @map("creado_en")
+  actualizadoEn       DateTime       @updatedAt @map("actualizado_en")
+
+  @@index([organizacionId, disponibilidad])
+  @@map("perfil_comercial")
+}

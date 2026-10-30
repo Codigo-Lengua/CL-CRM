@@ -4,14 +4,14 @@ import { conOrganizacion, db, dbPlataforma, ErrorSinOrganizacion } from "..";
 
 // Prueba de integración: necesita PostgreSQL con las migraciones aplicadas (npm run test:integracion).
 const plataforma = dbPlataforma();
-const orgA = `org-a-${randomUUID()}`;
-const orgB = `org-b-${randomUUID()}`;
+const orgA = randomUUID();
+const orgB = randomUUID();
 
 beforeAll(async () => {
   await plataforma.organization.createMany({
     data: [
-      { id: orgA, name: "Organización A", slug: orgA },
-      { id: orgB, name: "Organización B", slug: orgB },
+      { id: orgA, name: "Organización A", slug: `org-a-${orgA}`, createdAt: new Date() },
+      { id: orgB, name: "Organización B", slug: `org-b-${orgB}`, createdAt: new Date() },
     ],
   });
 });
@@ -121,7 +121,9 @@ describe("RN-02 aislamiento por organización", () => {
     ).rejects.toThrow(/plataforma/);
     await expect(
       conOrganizacion(orgA, () =>
-        db().organization.create({ data: { id: randomUUID(), name: "X", slug: randomUUID() } }),
+        db().organization.create({
+          data: { id: randomUUID(), name: "X", slug: randomUUID(), createdAt: new Date() },
+        }),
       ),
     ).rejects.toThrow(/plataforma/);
   });

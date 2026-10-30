@@ -13,7 +13,15 @@ export const MODELOS_GLOBALES: ReadonlySet<string> = new Set(["Organization"]);
  * escriben con dbPlataforma(), nunca con db(), para que ninguna organización vea usuarios
  * o tokens de sesión ajenos.
  */
-export const MODELOS_PLATAFORMA: ReadonlySet<string> = new Set<string>([]);
+export const MODELOS_PLATAFORMA: ReadonlySet<string> = new Set<string>([
+  "User",
+  "Session",
+  "Account",
+  "Verification",
+  "Member",
+  "Invitation",
+  "TwoFactor",
+]);
 
 /**
  * La organización es global pero tiene relaciones con todas las tablas de negocio: sin

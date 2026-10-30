@@ -23,7 +23,7 @@ datasource db {
 /// Los datos personales de antes y despues van enmascarados.
 model Auditoria {
   id             String       @id @default(uuid()) @db.Uuid
-  organizacionId String       @default(dbgenerated("current_setting('app.organizacion_id', true)")) @map("organizacion_id")
+  organizacionId String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
   organizacion   Organization @relation(fields: [organizacionId], references: [id], onDelete: Restrict)
   usuarioId      String?      @map("usuario_id")
   accion         String

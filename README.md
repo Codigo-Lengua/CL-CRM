@@ -10,6 +10,22 @@ Antes de contribuir, lee el [flujo de trabajo](docs/flujo-de-trabajo.md). En res
 
 - Node.js 22 o superior
 - npm
+- Docker, para PostgreSQL 16 en local
+
+## Primer arranque
+
+```bash
+cp .env.example .env            # y completa BETTER_AUTH_SECRET con: openssl rand -base64 32
+cp .env .env.local
+docker compose up -d db
+npm install
+npx prisma migrate deploy
+CONTRASENA_ADMIN='una-clave-larga' npm run alta-organizacion -- \
+  --nombre "CÓDIGO LENGUA" --slug codigo-lengua --admin-nombre "Tu nombre" --admin-email tu@correo.co
+npm run dev
+```
+
+No hay registro abierto: la primera organización y su ADMIN se crean con `alta-organizacion`, y el resto del equipo entra por invitación desde **Configuración → Equipo** (`/configuracion/equipo`). Al primer ingreso, el ADMIN debe activar la verificación en dos pasos. Mientras no haya proveedor de correo, los enlaces de invitación se copian desde esa pantalla; en local, los correos se imprimen en la consola.
 
 ## Comandos
 
@@ -17,6 +33,8 @@ Antes de contribuir, lee el [flujo de trabajo](docs/flujo-de-trabajo.md). En res
 | ---------------------------- | ----------------------------------------------- |
 | `npm run dev`                | Servidor de desarrollo en http://localhost:3000 |
 | `npm test`                   | Pruebas de las reglas de negocio (Vitest)       |
+| `npm run test:integracion`   | Pruebas contra PostgreSQL (aislamiento, login)  |
+| `npm run alta-organizacion`  | Crea una organización con su primer ADMIN       |
 | `npm run typecheck`          | Revisión de tipos                               |
 | `npm run lint`               | Revisión de estilo                              |
 | `npm run build`              | Compila la versión de producción                |
@@ -27,6 +45,11 @@ Antes de contribuir, lee el [flujo de trabajo](docs/flujo-de-trabajo.md). En res
 ```
 src/
   app/        pantallas y API (Next.js App Router)
+    (auth)/     ingresar, dos pasos, recuperar clave, aceptar invitación
+  lib/
+    auth/       Better Auth: configuración, sesión con organización activa, auditoría
+    permisos/   roles ADMIN, SOCIO y ASESOR y matriz de permisos (CL-CRM-02 §11)
+    db/         Prisma con aislamiento por organización (RN-02)
   modules/    reglas de negocio por módulo (CL-CRM-05)
     calendario/  horario, festivos y reloj hábil (RN-03 a RN-05)
     sla/         vencimiento y escalamiento (RN-14 en adelante)
