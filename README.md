@@ -4,6 +4,8 @@ CRM multiempresa de CÓDIGO LENGUA: prospectos, actividades, embudo, cotizacione
 
 La especificación está en los documentos CL-CRM-00 a CL-CRM-07 (versión 2.0). Las correcciones posteriores se registran en [`docs/decisiones`](docs/decisiones).
 
+Antes de contribuir, lee el [flujo de trabajo](docs/flujo-de-trabajo.md). En resumen: las ramas salen de `dev`, los PR van contra `dev` y la CI y el despliegue solo corren en el PR de `dev` a `main`.
+
 ## Requisitos
 
 - Node.js 22 o superior
@@ -18,6 +20,7 @@ La especificación está en los documentos CL-CRM-00 a CL-CRM-07 (versión 2.0).
 | `npm run typecheck` | Revisión de tipos |
 | `npm run lint` | Revisión de estilo |
 | `npm run build` | Compila la versión de producción |
+| `npm run ventana-despliegue` | Indica si ahora se puede desplegar a producción |
 
 ## Estructura
 

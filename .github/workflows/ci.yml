@@ -1,12 +1,27 @@
 name: CI
 
+# Solo corre en los PR de dev a main (docs/flujo-de-trabajo.md §6).
 on:
   pull_request:
-  push:
     branches: [main]
 
 jobs:
+  origen-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar que el PR viene de dev (o es un hotfix)
+        env:
+          ORIGEN: ${{ github.head_ref }}
+        run: |
+          if [ "$ORIGEN" = "dev" ] || [[ "$ORIGEN" == hotfix/* ]]; then
+            echo "Origen permitido: $ORIGEN"
+          else
+            echo "::error::Los PR a main solo pueden venir de dev o de hotfix/*. Origen: $ORIGEN"
+            exit 1
+          fi
+
   verificar:
+    needs: origen-dev
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -21,10 +36,13 @@ jobs:
         run: npm run typecheck
       - name: Pruebas de reglas (Vitest)
         run: npm test
+      - name: Dependencias
+        run: npm audit --audit-level=high --omit=dev
       - name: Build
         run: npm run build
 
   secretos:
+    needs: origen-dev
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -38,3 +56,14 @@ jobs:
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       - name: Buscar secretos
         run: gitleaks git --redact --verbose .
+
+  imagen:
+    needs: origen-dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Construir la imagen Docker (sin publicar)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false

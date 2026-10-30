@@ -1,0 +1,37 @@
+name: Actualizar PR con dev
+
+# Cada vez que algo entra a dev, fusiona dev en los PR abiertos contra dev.
+on:
+  push:
+    branches: [dev]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const prs = await github.paginate(github.rest.pulls.list, { owner, repo, state: "open", base: "dev" });
+            for (const pr of prs) {
+              try {
+                await github.rest.pulls.updateBranch({ owner, repo, pull_number: pr.number });
+                core.info(`#${pr.number} actualizado con dev`);
+              } catch (error) {
+                core.warning(`#${pr.number} no se pudo actualizar: ${error.message}`);
+                const yaMarcado = pr.labels.some((l) => l.name === "conflicto");
+                if (!yaMarcado) {
+                  await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: ["conflicto"] });
+                  await github.rest.issues.createComment({
+                    owner, repo, issue_number: pr.number,
+                    body: "Este PR tiene conflictos con `dev`. Actualiza la rama con `dev`, resuélvelos y quita la etiqueta `conflicto`.",
+                  });
+                }
+              }
+            }
