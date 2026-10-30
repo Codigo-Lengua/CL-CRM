@@ -4,6 +4,10 @@
 // - Toda tabla de negocio lleva organizacionId con el default de abajo; las globales se
 //   declaran en src/lib/db/organizacion.ts. La extensión de Prisma siempre lo asigna; el
 //   default solo hace que el tipo sea opcional y que un INSERT a mano sin organización falle.
+// - Toda relación entre dos tablas de negocio usa llave compuesta con organizacionId, para
+//   que un connect o un include nunca cruce de organización: el modelo referido declara
+//   @@unique([organizacionId, id]) y la relación usa
+//   @relation(fields: [organizacionId, xId], references: [organizacionId, id]).
 // - id uuid, creado_en y actualizado_en en todas las tablas del CRM.
 
 generator client {
