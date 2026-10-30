@@ -1,0 +1,37 @@
+// Configuración común del esquema. Cada módulo tiene su propio archivo en esta carpeta.
+// Convenciones (CL-CRM-04 §1):
+// - Modelos en PascalCase y en español; tablas y columnas en snake_case con @@map y @map.
+// - Toda tabla de negocio lleva organizacionId con el default de abajo; las globales se
+//   declaran en src/lib/db/organizacion.ts. La extensión de Prisma siempre lo asigna; el
+//   default solo hace que el tipo sea opcional y que un INSERT a mano sin organización falle.
+// - id uuid, creado_en y actualizado_en en todas las tablas del CRM.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Quién creó, cambió, exportó o eliminó cada registro (CL-CRM-04 §4.8).
+/// Los datos personales de antes y despues van enmascarados.
+model Auditoria {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizacionId String       @default(dbgenerated("current_setting('app.organizacion_id', true)")) @map("organizacion_id")
+  organizacion   Organization @relation(fields: [organizacionId], references: [id], onDelete: Restrict)
+  usuarioId      String?      @map("usuario_id")
+  accion         String
+  entidad        String
+  entidadId      String?      @map("entidad_id")
+  antes          Json?
+  despues        Json?
+  ip             String?
+  ocurridoEn     DateTime     @default(now()) @map("ocurrido_en")
+  creadoEn       DateTime     @default(now()) @map("creado_en")
+  actualizadoEn  DateTime     @updatedAt @map("actualizado_en")
+
+  @@index([organizacionId, entidad, entidadId])
+  @@map("auditoria")
+}

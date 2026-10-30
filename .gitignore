@@ -42,3 +42,4 @@ next-env.d.ts
 
 # env de ejemplo sí se versiona
 !.env.example
+src/generated/

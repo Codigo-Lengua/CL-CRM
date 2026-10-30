@@ -2,14 +2,14 @@
 FROM node:22-alpine AS dependencias
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 FROM node:22-alpine AS compilacion
 WORKDIR /app
 COPY --from=dependencias /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN npx prisma generate && npm run build
 
 FROM node:22-alpine AS ejecucion
 WORKDIR /app

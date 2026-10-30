@@ -112,7 +112,8 @@ Corre **solo** en los PR de `dev` a `main`. Ningún paso se puede saltar para fu
 | Build | La aplicación compila | Activo |
 | Imagen | La imagen Docker se construye (sin publicar) | Activo |
 | Secretos | gitleaks sobre todo el historial | Activo |
-| Migraciones | `prisma migrate diff` sin cambios pendientes | Al entrar Prisma |
+| Migraciones | Se aplican con `prisma migrate deploy` sobre PostgreSQL limpio | Activo |
+| Integración | Pruebas `*.int.test.ts` contra PostgreSQL (aislamiento por organización) | Activo |
 | Fronteras de módulos | Ningún módulo importa el interior de otro | Con el segundo módulo con infraestructura |
 | Flujos completos | Playwright sobre PostgreSQL de prueba | Corte 2 |
 | Contrato de la API | oasdiff contra la versión publicada | Etapa 2 |

@@ -1,0 +1,16 @@
+// Tablas de Better Auth (CL-CRM-03 §5). Este archivo lo regenera el CLI de Better Auth
+// en la issue #4; aquí solo está organization, que necesita el aislamiento por organización.
+// No se les agregan columnas: los datos del CRM van en tablas 1 a 1.
+
+model Organization {
+  id        String   @id
+  name      String
+  slug      String   @unique
+  logo      String?
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  auditorias Auditoria[]
+
+  @@map("organization")
+}
