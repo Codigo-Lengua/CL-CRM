@@ -19,7 +19,8 @@
     "format:check": "prettier --check .",
     "prepare": "husky",
     "alta-organizacion": "tsx scripts/alta-organizacion.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

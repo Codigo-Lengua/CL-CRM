@@ -36,6 +36,7 @@ No hay registro abierto: la primera organización y su ADMIN se crean con `alta-
 | `npm run test:integracion`   | Pruebas contra PostgreSQL (aislamiento, login)                          |
 | `npm run test:e2e`           | Flujos completos en el navegador (Playwright); necesita `npm run build` |
 | `npm run alta-organizacion`  | Crea una organización con su primer ADMIN                               |
+| `npm run seed`               | Completa la plantilla de parámetros en las organizaciones existentes    |
 | `npm run typecheck`          | Revisión de tipos                                                       |
 | `npm run lint`               | Revisión de estilo                                                      |
 | `npm run build`              | Compila la versión de producción                                        |
