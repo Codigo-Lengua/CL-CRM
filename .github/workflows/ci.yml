@@ -59,6 +59,17 @@ jobs:
         run: npm audit --audit-level=high --omit=dev
       - name: Build
         run: npm run build
+      - name: Navegador para las pruebas de flujo
+        run: npx playwright install --with-deps chromium
+      - name: Pruebas de flujo completo (Playwright)
+        run: npm run test:e2e
+      - name: Reporte de Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-playwright
+          path: playwright-report/
+          retention-days: 7
 
   secretos:
     needs: origen-dev
