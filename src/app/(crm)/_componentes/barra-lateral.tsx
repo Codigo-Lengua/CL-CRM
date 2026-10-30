@@ -16,6 +16,10 @@ interface Seccion {
 const SECCIONES: Seccion[] = [
   { enlaces: [{ href: "/", nombre: "Inicio" }] },
   {
+    titulo: "Comercial",
+    enlaces: [{ href: "/empresas", nombre: "Empresas", permiso: "empresas.ver_editar" }],
+  },
+  {
     titulo: "Configuración",
     enlaces: [
       { href: "/configuracion/equipo", nombre: "Equipo", permiso: "configuracion.administrar" },

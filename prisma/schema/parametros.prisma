@@ -50,20 +50,23 @@ model Configuracion {
 
 /// Diccionarios de la organización: categorías, fuentes, motivos y resultados.
 model ValorCatalogo {
-  id             String       @id @default(uuid()) @db.Uuid
-  organizacionId String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
-  organizacion   Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
-  tipo           TipoCatalogo
-  codigo         String
-  etiqueta       String
-  orden          Int          @default(0)
-  activo         Boolean      @default(true)
+  id                String       @id @default(uuid()) @db.Uuid
+  organizacionId    String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion      Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  tipo              TipoCatalogo
+  codigo            String
+  etiqueta          String
+  orden             Int          @default(0)
+  activo            Boolean      @default(true)
   /// El código depende de este valor: no se puede borrar ni cambiar su código.
-  esSistema      Boolean      @default(false) @map("es_sistema")
+  esSistema         Boolean      @default(false) @map("es_sistema")
   /// Significado adicional, por ejemplo {"contacto_efectivo": true}.
-  atributos      Json?
-  creadoEn       DateTime     @default(now()) @map("creado_en")
-  actualizadoEn  DateTime     @updatedAt @map("actualizado_en")
+  atributos         Json?
+  // Relaciones inversas de empresas.prisma.
+  empresasCategoria Empresa[]    @relation("CategoriaEmpresa")
+  empresasFuente    Empresa[]    @relation("FuenteEmpresa")
+  creadoEn          DateTime     @default(now()) @map("creado_en")
+  actualizadoEn     DateTime     @updatedAt @map("actualizado_en")
 
   @@unique([organizacionId, tipo, codigo])
   @@unique([organizacionId, id])

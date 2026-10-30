@@ -1,0 +1,96 @@
+// Empresas (prospectos y clientes) y sus contactos (CL-CRM-04 §4.2, RN-07 a RN-09 y RN-47).
+// Los datos personales viven solo aquí, en leads y en mensajes, para poder suprimirlos
+// sin tocar cotizaciones, pagos ni comisiones.
+
+enum CanalOrigen {
+  WEB
+  GOOGLE_PLACES
+  MANUAL
+  WHATSAPP
+  INSTAGRAM
+  MESSENGER
+  ANUNCIO
+}
+
+enum OrigenDato {
+  FORMULARIO
+  FUENTE_PUBLICA
+  REFERIDO
+  VISITA
+  IMPORTACION
+}
+
+/// Prospecto o cliente.
+model Empresa {
+  id                 String         @id @default(uuid()) @db.Uuid
+  organizacionId     String         @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion       Organization   @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  /// Dueño actual (user.id). Sin relación: user es tabla de plataforma.
+  asesorId           String?        @map("asesor_id") @db.Uuid
+  duenoDesde         DateTime?      @map("dueno_desde")
+  nombre             String
+  categoriaId        String?        @map("categoria_id") @db.Uuid
+  categoria          ValorCatalogo? @relation("CategoriaEmpresa", fields: [organizacionId, categoriaId], references: [organizacionId, id], onDelete: NoAction)
+  telefono           String?
+  /// Teléfono normalizado en formato internacional; sirve para encontrar duplicados (RN-07).
+  telefonoE164       String?        @map("telefono_e164")
+  whatsapp           String?
+  correo             String?
+  direccion          String?
+  localidad          String?
+  ciudad             String?
+  sitioWeb           String?        @map("sitio_web")
+  instagram          String?
+  googlePlaceId      String?        @map("google_place_id")
+  calificacionGoogle Decimal?       @map("calificacion_google") @db.Decimal(2, 1)
+  numResenas         Int?           @map("num_resenas")
+  fuenteId           String?        @map("fuente_id") @db.Uuid
+  fuente             ValorCatalogo? @relation("FuenteEmpresa", fields: [organizacionId, fuenteId], references: [organizacionId, id], onDelete: NoAction)
+  canal              CanalOrigen    @default(MANUAL)
+  campana            String?
+  utm                Json?
+  origenDato         OrigenDato     @default(FORMULARIO) @map("origen_dato")
+  /// Bloquea llamadas, mensajes y envíos (RN-08).
+  noContactar        Boolean        @default(false) @map("no_contactar")
+  /// Escribió primero o aceptó mensajes por WhatsApp (RN-09).
+  aceptaWhatsapp     Boolean        @default(false) @map("acepta_whatsapp")
+  /// Texto libre del asesor. Se borra al suprimir (RN-47).
+  notas              String?
+  suprimidaEn        DateTime?      @map("suprimida_en")
+  contactos          Contacto[]
+  creadoEn           DateTime       @default(now()) @map("creado_en")
+  actualizadoEn      DateTime       @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, id])
+  @@unique([organizacionId, googlePlaceId])
+  @@index([organizacionId, telefonoE164])
+  @@index([organizacionId, asesorId])
+  @@index([organizacionId, nombre])
+  @@map("empresa")
+}
+
+/// Persona de contacto de una empresa, con la prueba de su autorización (Ley 1581).
+model Contacto {
+  id                 String       @id @default(uuid()) @db.Uuid
+  organizacionId     String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion       Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  empresaId          String       @map("empresa_id") @db.Uuid
+  empresa            Empresa      @relation(fields: [organizacionId, empresaId], references: [organizacionId, id], onDelete: Cascade)
+  nombre             String
+  cargo              String?
+  telefono           String?
+  telefonoE164       String?      @map("telefono_e164")
+  correo             String?
+  esPrincipal        Boolean      @default(false) @map("es_principal")
+  autorizacionFecha  DateTime?    @map("autorizacion_fecha")
+  autorizacionTexto  String?      @map("autorizacion_texto")
+  autorizacionOrigen String?      @map("autorizacion_origen")
+  notas              String?
+  suprimidoEn        DateTime?    @map("suprimido_en")
+  creadoEn           DateTime     @default(now()) @map("creado_en")
+  actualizadoEn      DateTime     @updatedAt @map("actualizado_en")
+
+  @@index([organizacionId, empresaId])
+  @@index([organizacionId, telefonoE164])
+  @@map("contacto")
+}
