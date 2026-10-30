@@ -16,15 +16,16 @@ dev ──▶ feature/… ──PR (squash)──▶ dev ──PR dev → main (
 
 ## 1. Ramas
 
-| Rama | Para qué | Sale de | Se fusiona en |
-| --- | --- | --- | --- |
-| `main` | Lo que está en producción | — | — |
-| `dev` | Integración del trabajo terminado; rama por defecto del repositorio | `main` | `main`, solo por PR |
-| `feature/<modulo>-<descripcion>` | Funcionalidad nueva | `dev` | `dev` |
-| `fix/<modulo>-<descripcion>` | Corrección | `dev` | `dev` |
-| `docs/<descripcion>` | Documentación | `dev` | `dev` |
-| `diseno/<descripcion>` | Pantallas, estilos, componentes visuales | `dev` | `dev` |
-| `hotfix/<descripcion>` | Corrección urgente de producción (sección 7) | `main` | `main` y luego `dev` |
+| Rama                             | Para qué                                                            | Sale de | Se fusiona en        |
+| -------------------------------- | ------------------------------------------------------------------- | ------- | -------------------- |
+| `main`                           | Lo que está en producción                                           | —       | —                    |
+| `dev`                            | Integración del trabajo terminado; rama por defecto del repositorio | `main`  | `main`, solo por PR  |
+| `feature/<modulo>-<descripcion>` | Funcionalidad nueva                                                 | `dev`   | `dev`                |
+| `fix/<modulo>-<descripcion>`     | Corrección                                                          | `dev`   | `dev`                |
+| `docs/<descripcion>`             | Documentación                                                       | `dev`   | `dev`                |
+| `diseno/<descripcion>`           | Pantallas, estilos, componentes visuales                            | `dev`   | `dev`                |
+| `ci/<descripcion>`               | Integración continua, despliegue y herramientas del repositorio     | `dev`   | `dev`                |
+| `hotfix/<descripcion>`           | Corrección urgente de producción (sección 7)                        | `main`  | `main` y luego `dev` |
 
 Reglas:
 
@@ -46,13 +47,13 @@ Reglas: RN-14, D-01
 Cierra #12
 ```
 
-| Tipo | Uso |
-| --- | --- |
-| `feat` | Funcionalidad nueva |
-| `fix` | Corrección |
-| `regla` | Cambio en una regla de negocio RN existente; exige su prueba |
-| `migracion` | Cambio de esquema de base de datos |
-| `docs`, `diseno`, `pruebas`, `ci`, `refactor`, `deps` | Sin cambio funcional |
+| Tipo                                                  | Uso                                                          |
+| ----------------------------------------------------- | ------------------------------------------------------------ |
+| `feat`                                                | Funcionalidad nueva                                          |
+| `fix`                                                 | Corrección                                                   |
+| `regla`                                               | Cambio en una regla de negocio RN existente; exige su prueba |
+| `migracion`                                           | Cambio de esquema de base de datos                           |
+| `docs`, `diseno`, `pruebas`, `ci`, `refactor`, `deps` | Sin cambio funcional                                         |
 
 Ejemplos: `feat(reparto): Agregar rotación equitativa entre asesores elegibles` · `fix(calendario): Respetar festivos propios de la organización`.
 
@@ -66,7 +67,7 @@ Ejemplos: `feat(reparto): Agregar rotación equitativa entre asesores elegibles`
 - Usan la plantilla `.github/pull_request_template.md`: módulo, issue, reglas RN, pruebas y archivos que toca.
 - Reciben una **etiqueta automática** según el prefijo de la rama (sección 4).
 - Deben estar **al día con `dev`**: la verificación `al-dia-con-dev` bloquea la fusión si la rama quedó atrás, y cada fusión a `dev` actualiza sola los demás PR abiertos (sección 5).
-- Antes de abrir el PR, quien lo sube corre en local `npm run lint && npm run typecheck && npm test`. En estos PR no corre la integración continua.
+- Antes de abrir el PR, quien lo sube corre en local `npm run format:check && npm run lint && npm run typecheck && npm test`. En estos PR no corre la integración continua.
 - Se fusionan con **squash**: el título del PR queda como único commit en `dev`.
 
 ### De `dev` a `main`
@@ -78,12 +79,13 @@ Ejemplos: `feat(reparto): Agregar rotación equitativa entre asesores elegibles`
 
 ## 4. Etiquetas
 
-| Etiqueta | Cuándo | Asignación automática por rama |
-| --- | --- | --- |
-| `mejora` | Funcionalidad nueva o mejora de una existente | `feature/` |
-| `bug` | Corrección de un error | `fix/`, `hotfix/` |
-| `documentacion` | Solo documentación | `docs/` |
-| `diseno` | Pantallas, estilos, componentes visuales | `diseno/` |
+| Etiqueta        | Cuándo                                           | Asignación automática por rama |
+| --------------- | ------------------------------------------------ | ------------------------------ |
+| `mejora`        | Funcionalidad nueva o mejora de una existente    | `feature/`                     |
+| `bug`           | Corrección de un error                           | `fix/`, `hotfix/`              |
+| `documentacion` | Solo documentación                               | `docs/`                        |
+| `diseno`        | Pantallas, estilos, componentes visuales         | `diseno/`                      |
+| `ci`            | Integración continua, despliegue, lint y formato | `ci/`                          |
 
 La etiqueta se puede corregir a mano si la rama no describe bien el cambio. Las issues usan las mismas etiquetas y un **hito** por etapa.
 
@@ -102,21 +104,24 @@ Varias personas o agentes trabajan a la vez. Para que no choquen:
 
 Corre **solo** en los PR de `dev` a `main`. Ningún paso se puede saltar para fusionar.
 
-| Paso | Qué verifica | Estado |
-| --- | --- | --- |
-| Origen | El PR viene de `dev` | Activo |
-| Lint | ESLint sin errores | Activo |
-| Tipos | `next typegen` + TypeScript estricto | Activo |
-| Pruebas unitarias | Todas las reglas RN con Vitest | Activo |
-| Dependencias | `npm audit --audit-level=high` | Activo |
-| Build | La aplicación compila | Activo |
-| Imagen | La imagen Docker se construye (sin publicar) | Activo |
-| Secretos | gitleaks sobre todo el historial | Activo |
-| Migraciones | Se aplican con `prisma migrate deploy` sobre PostgreSQL limpio | Activo |
-| Integración | Pruebas `*.int.test.ts` contra PostgreSQL (aislamiento por organización) | Activo |
-| Fronteras de módulos | Ningún módulo importa el interior de otro | Con el segundo módulo con infraestructura |
-| Flujos completos | Playwright sobre PostgreSQL de prueba | Corte 2 |
-| Contrato de la API | oasdiff contra la versión publicada | Etapa 2 |
+| Paso                 | Qué verifica                                                             | Estado                                    |
+| -------------------- | ------------------------------------------------------------------------ | ----------------------------------------- |
+| Origen               | El PR viene de `dev`                                                     | Activo                                    |
+| Formato              | `prettier --check` sobre todo el repositorio                             | Activo                                    |
+| Lint                 | ESLint sin errores ni advertencias                                       | Activo                                    |
+| Tipos                | `next typegen` + TypeScript estricto                                     | Activo                                    |
+| Pruebas unitarias    | Todas las reglas RN con Vitest                                           | Activo                                    |
+| Dependencias         | `npm audit --audit-level=high`                                           | Activo                                    |
+| Build                | La aplicación compila                                                    | Activo                                    |
+| Imagen               | La imagen Docker se construye (sin publicar)                             | Activo                                    |
+| Secretos             | gitleaks sobre todo el historial                                         | Activo                                    |
+| Migraciones          | Se aplican con `prisma migrate deploy` sobre PostgreSQL limpio           | Activo                                    |
+| Integración          | Pruebas `*.int.test.ts` contra PostgreSQL (aislamiento por organización) | Activo                                    |
+| Fronteras de módulos | Ningún módulo importa el interior de otro                                | Con el segundo módulo con infraestructura |
+| Flujos completos     | Playwright sobre PostgreSQL de prueba                                    | Corte 2                                   |
+| Contrato de la API   | oasdiff contra la versión publicada                                      | Etapa 2                                   |
+
+**Estilo y formato.** Prettier (con `prettier-plugin-tailwindcss`, que ordena las clases) da el formato y ESLint revisa el código: la configuración de Next, reglas de `typescript-eslint` que usan los tipos (promesas sin `await`, `switch` incompletos, imports de tipos) y `eslint-config-prettier` para que no choquen. `.editorconfig` fija UTF-8, LF y dos espacios. Husky corre `lint-staged` antes de cada commit: formatea y revisa solo los archivos que cambian. `npm run format` formatea todo el repositorio.
 
 Un paso rojo nunca se desactiva para fusionar: se corrige la causa con un PR a `dev` y se actualiza el PR a `main`.
 
@@ -161,12 +166,12 @@ Versionado semántico. Cada PR de `dev` a `main` que se fusiona crea una versió
 
 El proyecto se reparte en **4 líneas**, una por agente, cada una dueña de sus carpetas. Como mucho trabajan **3 a la vez**: la línea Plataforma arranca sola porque las demás dependen de su base.
 
-| Línea | Issues de la etapa 1 | Carpetas propias | Arranca |
-| --- | --- | --- | --- |
-| Plataforma | #3 esquema y aislamiento, #4 Better Auth, #5 parámetros, #11 respaldo, #12 Coolify, #15 worker, #21 módulos, #22 Playwright | `prisma/schema/base.prisma`, `auth.prisma`, `src/lib/`, `src/worker/`, `src/app/(auth)/`, `.github/`, `package.json` | Primero, sola, hasta cerrar #3, #4 y #5 |
-| Comercial | #6 empresas, #7 actividades, #8 demos, #9 embudo, #10 importación, #20 tablero | `src/modules/{empresas,actividades,demos,embudo,tablero}/` y sus pantallas | Al cerrar #5 |
-| Cotización y envío | #13 catálogo, #14 cotización y PDF, #16 cascada de envío | `src/modules/{catalogo,cotizaciones,envios}/` y sus pantallas | Al cerrar #5 |
-| Reparto y SLA | #17 leads, #18 reparto, #19 SLA | `src/modules/{leads,reparto,sla,calendario}/` | Al cerrar #6 y #15 |
+| Línea              | Issues de la etapa 1                                                                                                        | Carpetas propias                                                                                                     | Arranca                                 |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Plataforma         | #3 esquema y aislamiento, #4 Better Auth, #5 parámetros, #11 respaldo, #12 Coolify, #15 worker, #21 módulos, #22 Playwright | `prisma/schema/base.prisma`, `auth.prisma`, `src/lib/`, `src/worker/`, `src/app/(auth)/`, `.github/`, `package.json` | Primero, sola, hasta cerrar #3, #4 y #5 |
+| Comercial          | #6 empresas, #7 actividades, #8 demos, #9 embudo, #10 importación, #20 tablero                                              | `src/modules/{empresas,actividades,demos,embudo,tablero}/` y sus pantallas                                           | Al cerrar #5                            |
+| Cotización y envío | #13 catálogo, #14 cotización y PDF, #16 cascada de envío                                                                    | `src/modules/{catalogo,cotizaciones,envios}/` y sus pantallas                                                        | Al cerrar #5                            |
+| Reparto y SLA      | #17 leads, #18 reparto, #19 SLA                                                                                             | `src/modules/{leads,reparto,sla,calendario}/`                                                                        | Al cerrar #6 y #15                      |
 
 Orden dentro de cada línea: el de los números de issue. Cada issue dice de qué otras depende; un agente no empieza una issue con dependencias abiertas.
 
@@ -180,14 +185,14 @@ Orden dentro de cada línea: el de los números de issue. Cada issue dice de qu�
 
 ## 11. Configuración de GitHub
 
-| Ajuste | Valor |
-| --- | --- |
-| Rama por defecto | `dev` |
-| Protección de `dev` | Solo por PR; verificación `al-dia-con-dev` obligatoria y estricta; historial lineal |
-| Protección de `main` | Solo por PR; verificaciones `origen-dev`, `verificar` y `secretos` obligatorias |
-| Fusiones permitidas | Squash (hacia `dev`) y merge commit (de `dev` a `main`) |
-| Borrar ramas al fusionar | Activado |
-| Ambiente `production` | Revisor obligatorio: Camilo; secreto `COOLIFY_WEBHOOK_PRODUCTION` y `COOLIFY_TOKEN` |
+| Ajuste                   | Valor                                                                               |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| Rama por defecto         | `dev`                                                                               |
+| Protección de `dev`      | Solo por PR; verificación `al-dia-con-dev` obligatoria y estricta; historial lineal |
+| Protección de `main`     | Solo por PR; verificaciones `origen-dev`, `verificar` y `secretos` obligatorias     |
+| Fusiones permitidas      | Squash (hacia `dev`) y merge commit (de `dev` a `main`)                             |
+| Borrar ramas al fusionar | Activado                                                                            |
+| Ambiente `production`    | Revisor obligatorio: Camilo; secreto `COOLIFY_WEBHOOK_PRODUCTION` y `COOLIFY_TOKEN` |
 
 Los secretos de la aplicación viven solo en Coolify y en el gestor de contraseñas.
 
@@ -195,7 +200,7 @@ Los secretos de la aplicación viven solo en Coolify y en el gestor de contrase�
 
 1. `git switch dev && git pull`
 2. `git switch -c feature/<modulo>-<descripcion>-<issue>`
-3. Programar con pruebas; antes de subir: `npm run lint && npm run typecheck && npm test`.
+3. Programar con pruebas; antes de subir: `npm run format:check && npm run lint && npm run typecheck && npm test`.
 4. `git push -u origin <rama>` y abrir el PR contra `dev` con la plantilla.
 5. Revisión → **Squash and merge**.
 6. Cuando `dev` tenga un conjunto listo: PR de `dev` a `main` → CI → **Merge commit** → despliegue.

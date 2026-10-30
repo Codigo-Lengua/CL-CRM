@@ -59,7 +59,8 @@ jobs:
         env:
           COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK_PRODUCTION }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
-        run: curl -sSf -X GET "$COOLIFY_WEBHOOK" -H "Authorization: Bearer $COOLIFY_TOKEN"
+        run: |
+          curl -sSf -X GET "$COOLIFY_WEBHOOK" -H "Authorization: Bearer $COOLIFY_TOKEN"
       - name: Verificar /api/health
         run: |
           for intento in $(seq 1 18); do

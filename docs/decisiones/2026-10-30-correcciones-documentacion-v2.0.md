@@ -31,17 +31,17 @@ Cada decisión tiene un identificador `D-xx`. El código que la aplica la cita e
 
 ## Inconsistencias de gravedad media y baja
 
-| ID | Tema | Decisión |
-| --- | --- | --- |
+| ID   | Tema                           | Decisión                                                                                                                                                                                                            |
+| ---- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | D-04 | Dependencias "o" entre módulos | `MODULO.depende_de` pasa a ser una lista de grupos: el módulo se activa si se cumple **cada** grupo, y un grupo se cumple con **cualquiera** de sus módulos. Seguimiento automático = `[["COTIZACIONES", "CHAT"]]`. |
-| D-05 | Parámetros de devolución | Se agregan a CL-CRM-04 §5 `devolucion_requiere_avance = sí` y `devolucion_mes_iniciado = no_devuelve`. |
-| D-06 | Staging encendido | Staging queda encendido siempre (cabe en la memoria) e incluye un worker con 256 MB. CL-CRM-06 §10 se corrige. |
-| D-07 | Ruta de actividades | La ruta canónica es `POST /api/v1/empresas/:id/actividades`. Se corrige el ejemplo de CL-CRM-06 §15. |
-| D-08 | Alertas por WhatsApp | Todas las alertas salen por correo; por WhatsApp solo cuando el canal esté activo. Se corrige CL-CRM-03 §11. |
-| D-09 | Payload del sitio | El sitio envía `servicios` como códigos del catálogo (`["LANDING_AGENDA"]`) y `categoria` como código del diccionario; el CRM rechaza códigos desconocidos con 422. |
-| D-10 | Ventana de despliegue | La regla vive solo en CL-CRM-06 §11; CL-CRM-03 §13 la referencia. |
-| D-11 | Tablero en el núcleo | Cada indicador declara el módulo del que depende; si el módulo está apagado, la tarjeta no se muestra. |
-| D-12 | Neutralidad al sector | El "contador de clientes asegurados" (RN-26) es un indicador configurable (`meta_clientes_entregados`), no una regla del acuerdo de socios, y el usuario de respaldo se lee de `usuario_respaldo_id`. |
+| D-05 | Parámetros de devolución       | Se agregan a CL-CRM-04 §5 `devolucion_requiere_avance = sí` y `devolucion_mes_iniciado = no_devuelve`.                                                                                                              |
+| D-06 | Staging encendido              | Staging queda encendido siempre (cabe en la memoria) e incluye un worker con 256 MB. CL-CRM-06 §10 se corrige.                                                                                                      |
+| D-07 | Ruta de actividades            | La ruta canónica es `POST /api/v1/empresas/:id/actividades`. Se corrige el ejemplo de CL-CRM-06 §15.                                                                                                                |
+| D-08 | Alertas por WhatsApp           | Todas las alertas salen por correo; por WhatsApp solo cuando el canal esté activo. Se corrige CL-CRM-03 §11.                                                                                                        |
+| D-09 | Payload del sitio              | El sitio envía `servicios` como códigos del catálogo (`["LANDING_AGENDA"]`) y `categoria` como código del diccionario; el CRM rechaza códigos desconocidos con 422.                                                 |
+| D-10 | Ventana de despliegue          | La regla vive solo en CL-CRM-06 §11; CL-CRM-03 §13 la referencia.                                                                                                                                                   |
+| D-11 | Tablero en el núcleo           | Cada indicador declara el módulo del que depende; si el módulo está apagado, la tarjeta no se muestra.                                                                                                              |
+| D-12 | Neutralidad al sector          | El "contador de clientes asegurados" (RN-26) es un indicador configurable (`meta_clientes_entregados`), no una regla del acuerdo de socios, y el usuario de respaldo se lee de `usuario_respaldo_id`.               |
 
 ## Reglas que faltaban
 

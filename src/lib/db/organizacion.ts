@@ -52,7 +52,7 @@ export const extensionOrganizacion = Prisma.defineExtension({
 
         if (LECTURAS_Y_FILTROS.has(operation)) {
           a.where = { ...((a.where as Datos | undefined) ?? {}), organizacionId };
-          if (a.data && (operation.startsWith("update"))) {
+          if (a.data && operation.startsWith("update")) {
             a.data = asignarOrganizacion(a.data as Datos, organizacionId, model);
           }
         } else if (operation === "create") {
