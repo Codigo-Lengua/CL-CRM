@@ -1,5 +1,6 @@
 import { type Metadata } from "next";
 import { Suspense } from "react";
+import { Cargando, EncabezadoPagina, SinPermiso } from "@/components/ui";
 import { exigirSesion } from "@/lib/auth/sesion";
 import { conOrganizacion, db, dbPlataforma } from "@/lib/db";
 import { puede } from "@/lib/permisos";
@@ -13,7 +14,7 @@ export const metadata: Metadata = { title: "Parámetros" };
 async function Parametros() {
   const { organizacionId, rol } = await exigirSesion();
   if (!puede(rol, "configuracion.administrar")) {
-    return <p role="alert">Solo un administrador puede cambiar los parámetros.</p>;
+    return <SinPermiso texto="Solo un administrador puede cambiar los parámetros." />;
   }
 
   const datos = await conOrganizacion(organizacionId, async () => {
@@ -79,14 +80,12 @@ async function Parametros() {
 
 export default function PaginaParametros() {
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Parámetros</h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Los valores con los que trabaja el CRM en tu organización. Cada cambio queda en la auditoría.
-        </p>
-      </header>
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+    <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-6">
+      <EncabezadoPagina
+        titulo="Parámetros"
+        detalle="Los valores con los que trabaja el CRM en tu organización. Cada cambio queda en la auditoría."
+      />
+      <Suspense fallback={<Cargando />}>
         <Parametros />
       </Suspense>
     </main>

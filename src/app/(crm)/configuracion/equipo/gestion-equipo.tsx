@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { clasesControl } from "@/components/ui";
 import { authCliente } from "@/lib/auth/cliente";
 import { NOMBRE_ROL, type Rol } from "@/lib/permisos";
 
@@ -22,9 +23,8 @@ interface Invitacion {
 
 const fecha = new Intl.DateTimeFormat("es-CO", { dateStyle: "medium", timeZone: "America/Bogota" });
 
-const estiloCampo =
-  "rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900";
-const estiloEnlace = "text-sm text-violet-700 hover:underline disabled:opacity-50 dark:text-violet-300";
+const estiloCampo = `${clasesControl} h-auto py-2`;
+const estiloEnlace = "text-sm text-enlace hover:underline disabled:opacity-50";
 
 export function GestionEquipo(props: {
   organizacionId: string;
@@ -67,8 +67,8 @@ export function GestionEquipo(props: {
           role={aviso.tipo === "error" ? "alert" : "status"}
           className={`rounded-md border px-3 py-2 text-sm ${
             aviso.tipo === "error"
-              ? "border-red-300 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
-              : "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
+              ? "border-peligro bg-peligro-fondo text-peligro"
+              : "border-exito bg-exito-fondo text-exito"
           }`}
         >
           {aviso.texto}
@@ -97,7 +97,7 @@ export function GestionEquipo(props: {
           <button
             type="submit"
             disabled={pendiente}
-            className="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
+            className="rounded-md bg-primario px-4 py-2 text-sm font-medium text-sobre-primario hover:bg-primario-hover disabled:opacity-60"
           >
             Enviar invitación
           </button>
@@ -108,9 +108,9 @@ export function GestionEquipo(props: {
         <h2 id="titulo-miembros" className="font-semibold">
           Miembros ({miembros.length})
         </h2>
-        <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+        <div className="overflow-x-auto rounded-lg border border-borde">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-50 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+            <thead className="bg-superficie-alta text-texto-suave">
               <tr>
                 <th className="px-3 py-2 font-medium">Persona</th>
                 <th className="px-3 py-2 font-medium">Rol</th>
@@ -124,13 +124,13 @@ export function GestionEquipo(props: {
               {miembros.map((m) => {
                 const soyYo = m.id === miembroActualId;
                 return (
-                  <tr key={m.id} className="border-t border-zinc-200 dark:border-zinc-800">
+                  <tr key={m.id} className="border-t border-borde">
                     <td className="px-3 py-2">
                       <div className="font-medium">
                         {m.nombre}
                         {soyYo ? " (tú)" : ""}
                       </div>
-                      <div className="text-zinc-500">{m.email}</div>
+                      <div className="text-texto-suave">{m.email}</div>
                     </td>
                     <td className="px-3 py-2">
                       <select
@@ -198,9 +198,9 @@ export function GestionEquipo(props: {
           Invitaciones pendientes
         </h2>
         {invitaciones.length === 0 ? (
-          <p className="text-sm text-zinc-500">No hay invitaciones pendientes.</p>
+          <p className="text-sm text-texto-suave">No hay invitaciones pendientes.</p>
         ) : (
-          <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+          <ul className="divide-y divide-borde rounded-lg border border-borde">
             {invitaciones.map((i) => (
               <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
                 <span>

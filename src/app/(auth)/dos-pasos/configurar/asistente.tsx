@@ -44,7 +44,7 @@ export function AsistenteDosPasos({ obligatorio }: { obligatorio: boolean }) {
     return (
       <form onSubmit={alEnviar(activar)} className="flex flex-col gap-4">
         {obligatorio ? (
-          <Aviso tipo="ok">Tu rol exige verificación en dos pasos. Actívala para continuar.</Aviso>
+          <Aviso tono="ok">Tu rol exige verificación en dos pasos. Actívala para continuar.</Aviso>
         ) : null}
         <Campo
           etiqueta="Confirma tu contraseña"
@@ -68,17 +68,19 @@ export function AsistenteDosPasos({ obligatorio }: { obligatorio: boolean }) {
           <img
             src={estado.qr}
             alt="Código QR para la app de autenticación"
-            className="mt-2 rounded bg-white p-2"
+            className="mt-2 rounded p-2"
+            // Fondo blanco fijo en ambos modos: los lectores de QR necesitan oscuro sobre claro.
+            style={{ background: "white" }}
             width={200}
             height={200}
           />
-          <span className="mt-1 block text-xs text-zinc-500">
+          <span className="mt-1 block text-xs text-texto-suave">
             ¿No puedes escanear? Clave: <code className="break-all select-all">{estado.secreto}</code>
           </span>
         </li>
         <li>
           Guarda estos códigos de respaldo en un lugar seguro. Cada uno sirve una sola vez.
-          <ul className="mt-2 grid grid-cols-2 gap-1 rounded bg-zinc-100 p-2 font-mono text-xs dark:bg-zinc-800">
+          <ul className="mt-2 grid grid-cols-2 gap-1 rounded bg-superficie-alta p-2 font-mono text-xs">
             {estado.respaldo.map((c) => (
               <li key={c}>{c}</li>
             ))}

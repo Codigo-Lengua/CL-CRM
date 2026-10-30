@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { clasesBoton, clasesControl, Pestanas } from "@/components/ui";
 import { NOMBRE_ROL, esRol } from "@/lib/permisos";
 import {
   type GrupoParametro,
@@ -103,12 +104,10 @@ const UNIDAD: Record<string, string> = {
 
 const fechaLarga = new Intl.DateTimeFormat("es-CO", { dateStyle: "full", timeZone: "UTC" });
 
-const estiloCampo =
-  "rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900 disabled:opacity-60";
-const estiloBoton =
-  "rounded-md bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-700 focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:outline-none disabled:opacity-50";
-const estiloEnlace = "text-sm text-violet-700 hover:underline disabled:opacity-40 dark:text-violet-300";
-const estiloTarjeta = "rounded-lg border border-zinc-200 p-4 dark:border-zinc-800";
+const estiloCampo = `${clasesControl} h-auto py-2`;
+const estiloBoton = clasesBoton({ tamano: "sm" });
+const estiloEnlace = "text-sm text-enlace hover:underline disabled:opacity-40";
+const estiloTarjeta = "rounded-lg border border-borde bg-superficie p-4";
 
 type Aviso = { tipo: "ok" | "error"; texto: string } | null;
 
@@ -139,8 +138,8 @@ function MensajeAviso({ aviso }: { aviso: Aviso }) {
       role={aviso.tipo === "error" ? "alert" : "status"}
       className={`rounded-md border px-3 py-2 text-sm ${
         aviso.tipo === "error"
-          ? "border-red-300 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
-          : "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
+          ? "border-peligro bg-peligro-fondo text-peligro"
+          : "border-exito bg-exito-fondo text-exito"
       }`}
     >
       {aviso.texto}
@@ -159,43 +158,14 @@ export function EditorParametros(props: {
   const [pestana, setPestana] = useState<Pestana>("generales");
 
   return (
-    <div className="flex flex-col gap-6">
-      <div
-        role="tablist"
-        aria-label="Secciones"
-        className="flex gap-1 overflow-x-auto border-b border-zinc-200 dark:border-zinc-800"
-      >
-        {PESTANAS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            role="tab"
-            id={`pestana-${p.id}`}
-            aria-selected={pestana === p.id}
-            aria-controls={`panel-${p.id}`}
-            onClick={() => setPestana(p.id)}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap ${
-              pestana === p.id
-                ? "border-violet-600 text-violet-700 dark:text-violet-300"
-                : "border-transparent text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-            }`}
-          >
-            {p.nombre}
-          </button>
-        ))}
-      </div>
-
-      <div role="tabpanel" id={`panel-${pestana}`} aria-labelledby={`pestana-${pestana}`}>
-        {pestana === "generales" ? (
-          <Generales parametros={props.parametros} miembros={props.miembros} />
-        ) : null}
-        {pestana === "diccionarios" ? <Diccionarios valores={props.catalogos} /> : null}
-        {pestana === "canales" ? <Canales canales={props.canales} /> : null}
-        {pestana === "festivos" ? (
-          <Festivos propios={props.festivos} nacionales={props.festivosNacionales} />
-        ) : null}
-      </div>
-    </div>
+    <Pestanas opciones={PESTANAS} activa={pestana} onCambiar={setPestana}>
+      {pestana === "generales" ? <Generales parametros={props.parametros} miembros={props.miembros} /> : null}
+      {pestana === "diccionarios" ? <Diccionarios valores={props.catalogos} /> : null}
+      {pestana === "canales" ? <Canales canales={props.canales} /> : null}
+      {pestana === "festivos" ? (
+        <Festivos propios={props.festivos} nacionales={props.festivosNacionales} />
+      ) : null}
+    </Pestanas>
   );
 }
 
@@ -235,12 +205,12 @@ function FilaParametro({ parametro, miembros }: { parametro: Parametro; miembros
         <label htmlFor={id} className="text-sm font-medium">
           {parametro.nombre}
           {parametro.editable ? null : (
-            <span className="ml-2 rounded bg-zinc-100 px-1.5 py-0.5 text-xs font-normal text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+            <span className="ml-2 rounded bg-superficie-alta px-1.5 py-0.5 text-xs font-normal text-texto-suave">
               Lo define la plataforma
             </span>
           )}
         </label>
-        <p className="text-xs text-zinc-600 dark:text-zinc-400">{parametro.descripcion}</p>
+        <p className="text-xs text-texto-suave">{parametro.descripcion}</p>
       </div>
       {parametro.tipo === "HORARIO" ? (
         <EditorHorario
@@ -348,10 +318,10 @@ function EditorSimple(props: {
         />
       )}
       {UNIDAD[parametro.clave] ? (
-        <span className="text-sm text-zinc-600 dark:text-zinc-400">{UNIDAD[parametro.clave]}</span>
+        <span className="text-sm text-texto-suave">{UNIDAD[parametro.clave]}</span>
       ) : null}
       {parametro.tipo === "JSON" ? (
-        <span id={`${id}-ayuda`} className="text-xs text-zinc-500">
+        <span id={`${id}-ayuda`} className="text-xs text-texto-suave">
           Días separados por coma
         </span>
       ) : null}
@@ -399,7 +369,7 @@ function EditorHorario(props: {
               />
               {nombre}
             </label>
-            {franjas.length === 0 ? <span className="text-zinc-500">Cerrado</span> : null}
+            {franjas.length === 0 ? <span className="text-texto-suave">Cerrado</span> : null}
             {franjas.map((franja, i) => (
               <span key={i} className="flex items-center gap-1">
                 <input
@@ -499,7 +469,7 @@ function Diccionarios({ valores }: { valores: ValorCatalogo[] }) {
 
       <MensajeAviso aviso={aviso} />
 
-      <ul className="flex flex-col divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+      <ul className="flex flex-col divide-y divide-borde rounded-lg border border-borde">
         {lista.map((valor, i) => (
           <FilaValor
             key={valor.id}
@@ -510,7 +480,7 @@ function Diccionarios({ valores }: { valores: ValorCatalogo[] }) {
             ejecutar={ejecutar}
           />
         ))}
-        {lista.length === 0 ? <li className="p-3 text-sm text-zinc-500">Esta lista está vacía.</li> : null}
+        {lista.length === 0 ? <li className="p-3 text-sm text-texto-suave">Esta lista está vacía.</li> : null}
       </ul>
 
       <form onSubmit={agregar} className="flex flex-wrap items-end gap-2">
@@ -522,7 +492,7 @@ function Diccionarios({ valores }: { valores: ValorCatalogo[] }) {
           Agregar
         </button>
       </form>
-      <p className="text-xs text-zinc-500">
+      <p className="text-xs text-texto-suave">
         Los valores no se borran porque los registros guardados los siguen usando: desactívalos para que no se
         ofrezcan. Los marcados como del sistema no se pueden desactivar.
       </p>
@@ -592,8 +562,8 @@ function FilaValor(props: {
         </form>
       ) : (
         <div className="flex flex-1 flex-col">
-          <span className={valor.activo ? "" : "text-zinc-400 line-through"}>{valor.etiqueta}</span>
-          <span className="font-mono text-xs text-zinc-500">
+          <span className={valor.activo ? "" : "text-texto-suave line-through"}>{valor.etiqueta}</span>
+          <span className="font-mono text-xs text-texto-suave">
             {valor.codigo}
             {valor.esSistema ? " · del sistema" : ""}
           </span>
@@ -651,14 +621,14 @@ function Canales({ canales: iniciales }: { canales: CanalEnvio[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm text-texto-suave">
         La cotización se envía por el primer canal encendido; si falla tras sus reintentos, pasa al siguiente.
       </p>
       <ol className="flex flex-col gap-3">
         {canales.map((c, i) => (
           <li key={c.canal} className={`${estiloTarjeta} flex flex-col gap-3 text-sm`}>
             <div className="flex items-center gap-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-800 dark:bg-violet-900 dark:text-violet-200">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-superficie-alta text-xs font-semibold text-enlace">
                 {i + 1}
               </span>
               <span className="flex-1 font-medium">{NOMBRE_CANAL[c.canal]}</span>
@@ -759,17 +729,17 @@ function Festivos({ propios, nacionales }: { propios: Festivo[]; nacionales: str
         <h2 id="titulo-propios" className="font-semibold">
           Días no hábiles de tu organización
         </h2>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="text-sm text-texto-suave">
           Por ejemplo, el aniversario de la empresa o una jornada de inventario. No cuentan para los tiempos
           de respuesta.
         </p>
         <MensajeAviso aviso={aviso} />
-        <ul className="flex flex-col divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+        <ul className="flex flex-col divide-y divide-borde rounded-lg border border-borde">
           {propios.map((f) => (
             <li key={f.id} className="flex items-center gap-3 p-3 text-sm">
               <span className="flex-1">
                 {f.nombre}
-                <span className="block text-xs text-zinc-500">{fechaLarga.format(new Date(f.fecha))}</span>
+                <span className="block text-xs text-texto-suave">{fechaLarga.format(new Date(f.fecha))}</span>
               </span>
               <button
                 type="button"
@@ -782,7 +752,7 @@ function Festivos({ propios, nacionales }: { propios: Festivo[]; nacionales: str
             </li>
           ))}
           {propios.length === 0 ? (
-            <li className="p-3 text-sm text-zinc-500">Aún no hay días propios.</li>
+            <li className="p-3 text-sm text-texto-suave">Aún no hay días propios.</li>
           ) : null}
         </ul>
         <form onSubmit={agregar} className="flex flex-wrap items-end gap-2">
@@ -805,12 +775,12 @@ function Festivos({ propios, nacionales }: { propios: Festivo[]; nacionales: str
           <h2 id="titulo-nacionales" className="font-semibold">
             Festivos de Colombia
           </h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="text-sm text-texto-suave">
             Se calculan solos cada año con la Ley Emiliani; no hay que cargarlos.
           </p>
           <ul className="grid gap-1 text-sm sm:grid-cols-2">
             {nacionales.map((fecha) => (
-              <li key={fecha} className="text-zinc-700 dark:text-zinc-300">
+              <li key={fecha} className="text-texto">
                 {fechaLarga.format(new Date(fecha))}
               </li>
             ))}

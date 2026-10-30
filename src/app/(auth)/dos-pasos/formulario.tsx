@@ -44,7 +44,7 @@ export function FormularioDosPasos() {
       <button
         type="button"
         onClick={() => setRespaldo((r) => !r)}
-        className="text-sm text-violet-700 hover:underline dark:text-violet-300"
+        className="text-sm text-enlace hover:underline"
       >
         {respaldo ? "Usar el código de la app" : "No tengo el teléfono: usar un código de respaldo"}
       </button>

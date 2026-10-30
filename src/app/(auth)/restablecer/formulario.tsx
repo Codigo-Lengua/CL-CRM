@@ -26,11 +26,8 @@ export function FormularioRestablecer({ token }: { token: string }) {
   if (listo) {
     return (
       <>
-        <Aviso tipo="ok">Contraseña actualizada. Por seguridad se cerraron tus otras sesiones.</Aviso>
-        <Link
-          href="/ingresar"
-          className="text-center text-sm text-violet-700 hover:underline dark:text-violet-300"
-        >
+        <Aviso tono="ok">Contraseña actualizada. Por seguridad se cerraron tus otras sesiones.</Aviso>
+        <Link href="/ingresar" className="text-center text-sm text-enlace hover:underline">
           Ingresar
         </Link>
       </>

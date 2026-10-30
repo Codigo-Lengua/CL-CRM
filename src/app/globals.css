@@ -1,26 +1,84 @@
 @import "tailwindcss";
 
+/*
+ * Sistema de diseño (#43). Los componentes solo usan tokens semánticos (bg-superficie,
+ * text-texto, border-borde…); la paleta de Tailwind está apagada para que un color fijo
+ * no compile. Los valores de abajo son el tema por defecto, CÓDIGO LENGUA, y salen de
+ * src/modules/marca/dominio/tokens.ts (una prueba verifica que coincidan). La marca de
+ * cada organización los reemplaza en tiempo de ejecución con <EstiloMarca>.
+ */
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --font-*: initial;
+  --font-sans: var(--fuente-texto), ui-sans-serif, system-ui, sans-serif;
+  --font-titulos: var(--fuente-titulos), var(--fuente-texto), ui-sans-serif, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* tokens:oscuro */
+  --color-fondo: #0f1324;
+  --color-superficie: #1c1730;
+  --color-superficie-alta: #291b3b;
+  --color-borde: #382e50;
+  --color-borde-control: #715e87;
+  --color-texto: #f4eefa;
+  --color-texto-suave: #afacba;
+  --color-primario: #b263df;
+  --color-primario-hover: #a44fca;
+  --color-sobre-primario: #0f1324;
+  --color-enlace: #cb8eea;
+  --color-foco: #cb8eea;
+  --color-brillo: #cb8eea;
+  --color-peligro: #f87171;
+  --color-peligro-fondo: #2b1e2d;
+  --color-exito: #4ade80;
+  --color-exito-fondo: #162b2f;
+  --color-aviso: #fbbf24;
+  --color-aviso-fondo: #2b2824;
+  /* fin */
+}
+
+/* El modo oscuro es el principal; el claro se activa con data-tema="claro" en <html>. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --fuente-texto: var(--fuente-montserrat);
+  --fuente-titulos: var(--fuente-orbitron);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root[data-tema="claro"] {
+  color-scheme: light;
+  /* tokens:claro */
+  --color-fondo: #f4eefa;
+  --color-superficie: #fcfafe;
+  --color-superficie-alta: #e8deee;
+  --color-borde: #d5c7dc;
+  --color-borde-control: #9e89a8;
+  --color-texto: #0f1324;
+  --color-texto-suave: #545564;
+  --color-primario: #9549b9;
+  --color-primario-hover: #7a3e9b;
+  --color-sobre-primario: #ffffff;
+  --color-enlace: #9549b9;
+  --color-foco: #9549b9;
+  --color-brillo: #cb8eea;
+  --color-peligro: #b91c1c;
+  --color-peligro-fondo: #edd5df;
+  --color-exito: #15803d;
+  --color-exito-fondo: #d9e1e3;
+  --color-aviso: #a16207;
+  --color-aviso-fondo: #eadddd;
+  /* fin */
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 2px;
 }

@@ -48,6 +48,11 @@ No hay registro abierto: la primera organización y su ADMIN se crean con `alta-
 src/
   app/        pantallas y API (Next.js App Router)
     (auth)/     ingresar, dos pasos, recuperar clave, aceptar invitación
+    (crm)/      barra lateral con la marca y pantallas del CRM
+    (desarrollo)/sistema  todos los componentes en modo oscuro y claro (solo en desarrollo)
+  components/
+    ui/         componentes base del sistema de diseño; solo usan tokens (bg-superficie, text-texto…)
+    marca/      aplica la marca de la organización y el modo claro u oscuro
   lib/
     auth/       Better Auth: configuración, sesión con organización activa, auditoría
     permisos/   roles ADMIN, SOCIO y ASESOR y matriz de permisos (CL-CRM-02 §11)
@@ -55,8 +60,12 @@ src/
   modules/    reglas de negocio por módulo (CL-CRM-05)
     calendario/  horario, festivos y reloj hábil (RN-03 a RN-05)
     sla/         vencimiento y escalamiento (RN-14 en adelante)
+    parametros/  parámetros, diccionarios y plantilla por sector (RN-01)
+    marca/       colores, fuentes y logos por organización, con contraste AA
 docs/
   decisiones/ registro de decisiones con fecha, quién y por qué
 ```
+
+La interfaz no usa colores fijos: la paleta de Tailwind está apagada en `globals.css` y una prueba rechaza cualquier hex o clase como `bg-zinc-100`. Los colores salen de la marca de cada organización (Configuración → Marca).
 
 Cada módulo separa `dominio/` (reglas puras, sin Prisma ni Next.js), `aplicacion/`, `infraestructura/` y `pruebas/`. Cada función de regla cita su identificador RN y cada prueba empieza con él.
