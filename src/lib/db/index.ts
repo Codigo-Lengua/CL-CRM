@@ -3,7 +3,7 @@ import { PrismaClient } from "@/generated/prisma/client";
 import { extensionOrganizacion } from "./organizacion";
 
 export { conOrganizacion, organizacionActual, ErrorSinOrganizacion } from "./contexto";
-export { MODELOS_GLOBALES } from "./organizacion";
+export { MODELOS_GLOBALES, MODELOS_PLATAFORMA } from "./organizacion";
 
 function crearCliente() {
   const connectionString = process.env.DATABASE_URL;
@@ -13,7 +13,7 @@ function crearCliente() {
 
 export type ClienteDb = ReturnType<typeof crearCliente>;
 
-const global = globalThis as unknown as { __clienteDb?: ClienteDb };
+const global = globalThis as unknown as { __clienteDb?: ClienteDb; __clientePlataforma?: PrismaClient };
 
 /** Cliente único con aislamiento por organización (RN-02). En desarrollo sobrevive a la recarga. */
 export function db(): ClienteDb {
@@ -26,7 +26,10 @@ export function db(): ClienteDb {
  * superadministrador). Nunca se usa en pantallas ni endpoints de una organización.
  */
 export function dbPlataforma(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) throw new Error("Falta DATABASE_URL.");
-  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  if (!global.__clientePlataforma) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) throw new Error("Falta DATABASE_URL.");
+    global.__clientePlataforma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  }
+  return global.__clientePlataforma;
 }

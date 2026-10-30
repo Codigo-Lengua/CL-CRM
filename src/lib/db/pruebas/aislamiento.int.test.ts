@@ -76,4 +76,51 @@ describe("RN-02 aislamiento por organización", () => {
       ),
     ).rejects.toThrow(/otra organización/);
   });
+
+  it("RN-02 desde la organización no se ven ni se modifican otras organizaciones", async () => {
+    const visibles = await conOrganizacion(orgA, () => db().organization.findMany());
+    expect(visibles.map((o) => o.id)).toEqual([orgA]);
+
+    const ajena = await conOrganizacion(orgA, () => db().organization.findUnique({ where: { id: orgB } }));
+    expect(ajena).toBeNull();
+
+    const cambiadas = await conOrganizacion(orgA, () =>
+      db().organization.updateMany({ where: { id: orgB }, data: { name: "Ajena" } }),
+    );
+    expect(cambiadas.count).toBe(0);
+  });
+
+  it("RN-02 un include desde la organización no trae datos de otra", async () => {
+    await conOrganizacion(orgB, () => db().auditoria.create({ data: { accion: "CREAR", entidad: "Secreto" } }));
+    const conAuditorias = await conOrganizacion(orgA, () =>
+      db().organization.findUnique({ where: { id: orgB }, include: { auditorias: true } }),
+    );
+    expect(conAuditorias).toBeNull();
+  });
+
+  it("RN-02 no se puede escribir de forma anidada en otra organización", async () => {
+    await expect(
+      conOrganizacion(orgA, () =>
+        db().organization.update({
+          where: { id: orgB },
+          data: { auditorias: { create: { accion: "CREAR", entidad: "Anidado" } } },
+        }),
+      ),
+    ).rejects.toThrow();
+    const anidados = await plataforma.auditoria.count({ where: { organizacionId: orgB, entidad: "Anidado" } });
+    expect(anidados).toBe(0);
+  });
+
+  it("RN-02 crear o borrar organizaciones solo se permite desde la plataforma", async () => {
+    await expect(conOrganizacion(orgA, () => db().organization.delete({ where: { id: orgA } }))).rejects.toThrow(
+      /plataforma/,
+    );
+    await expect(
+      conOrganizacion(orgA, () => db().organization.create({ data: { id: randomUUID(), name: "X", slug: randomUUID() } })),
+    ).rejects.toThrow(/plataforma/);
+  });
+
+  it("RN-02 sin organización activa tampoco se leen organizaciones", async () => {
+    await expect(db().organization.findMany()).rejects.toBeInstanceOf(ErrorSinOrganizacion);
+  });
 });
