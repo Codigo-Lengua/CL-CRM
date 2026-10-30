@@ -35,7 +35,9 @@ describe("RN-02 aislamiento por organización", () => {
   });
 
   it("RN-02 ninguna consulta de una organización devuelve datos de la otra", async () => {
-    await conOrganizacion(orgB, () => db().auditoria.create({ data: { accion: "CREAR", entidad: "Prueba" } }));
+    await conOrganizacion(orgB, () =>
+      db().auditoria.create({ data: { accion: "CREAR", entidad: "Prueba" } }),
+    );
 
     const deA = await conOrganizacion(orgA, () => db().auditoria.findMany());
     const deB = await conOrganizacion(orgB, () => db().auditoria.findMany());
@@ -60,7 +62,9 @@ describe("RN-02 aislamiento por organización", () => {
     const actualizados = await conOrganizacion(orgA, () =>
       db().auditoria.updateMany({ where: { id: ajeno.id }, data: { accion: "HACKEO" } }),
     );
-    const borrados = await conOrganizacion(orgA, () => db().auditoria.deleteMany({ where: { id: ajeno.id } }));
+    const borrados = await conOrganizacion(orgA, () =>
+      db().auditoria.deleteMany({ where: { id: ajeno.id } }),
+    );
     expect(actualizados.count).toBe(0);
     expect(borrados.count).toBe(0);
   });

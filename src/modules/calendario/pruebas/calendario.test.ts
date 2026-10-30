@@ -33,12 +33,42 @@ describe("RN-03 hora hábil", () => {
 
 describe("RN-04 y RN-05 ejemplos de CL-CRM-05 §4", () => {
   const casos = [
-    { llegada: "2026-11-09T10:00", inicio: "2026-11-09T10:00", vence: "2026-11-09T10:10", porque: "dentro del horario" },
-    { llegada: "2026-11-09T16:45", inicio: "2026-11-09T16:45", vence: "2026-11-09T16:55", porque: "faltan 15 minutos: no aplica el corte" },
-    { llegada: "2026-11-09T16:52", inicio: "2026-11-10T08:00", vence: "2026-11-10T08:10", porque: "faltan 8 minutos: fuera de horario" },
-    { llegada: "2026-11-13T18:30", inicio: "2026-11-14T08:00", vence: "2026-11-14T08:10", porque: "el sábado es hábil" },
-    { llegada: "2026-11-07T12:55", inicio: "2026-11-09T08:00", vence: "2026-11-09T08:10", porque: "corte del sábado" },
-    { llegada: "2026-11-14T12:55", inicio: "2026-11-17T08:00", vence: "2026-11-17T08:10", porque: "corte del sábado con lunes festivo" },
+    {
+      llegada: "2026-11-09T10:00",
+      inicio: "2026-11-09T10:00",
+      vence: "2026-11-09T10:10",
+      porque: "dentro del horario",
+    },
+    {
+      llegada: "2026-11-09T16:45",
+      inicio: "2026-11-09T16:45",
+      vence: "2026-11-09T16:55",
+      porque: "faltan 15 minutos: no aplica el corte",
+    },
+    {
+      llegada: "2026-11-09T16:52",
+      inicio: "2026-11-10T08:00",
+      vence: "2026-11-10T08:10",
+      porque: "faltan 8 minutos: fuera de horario",
+    },
+    {
+      llegada: "2026-11-13T18:30",
+      inicio: "2026-11-14T08:00",
+      vence: "2026-11-14T08:10",
+      porque: "el sábado es hábil",
+    },
+    {
+      llegada: "2026-11-07T12:55",
+      inicio: "2026-11-09T08:00",
+      vence: "2026-11-09T08:10",
+      porque: "corte del sábado",
+    },
+    {
+      llegada: "2026-11-14T12:55",
+      inicio: "2026-11-17T08:00",
+      vence: "2026-11-17T08:10",
+      porque: "corte del sábado con lunes festivo",
+    },
   ];
 
   for (const caso of casos) {
@@ -54,16 +84,22 @@ describe("RN-04 y RN-05 ejemplos de CL-CRM-05 §4", () => {
   });
 
   it("RN-05 cruza al día hábil siguiente: 16:55 + 10 = martes 08:05", () => {
-    expect(calendario.sumarMinutosHabiles(bogota("2026-11-09T16:55"), 10)).toEqual(bogota("2026-11-10T08:05"));
+    expect(calendario.sumarMinutosHabiles(bogota("2026-11-09T16:55"), 10)).toEqual(
+      bogota("2026-11-10T08:05"),
+    );
   });
 
   it("RN-05 D-19 el vencimiento puede caer justo en el cierre", () => {
-    expect(calendario.sumarMinutosHabiles(bogota("2026-11-09T16:50"), 10)).toEqual(bogota("2026-11-09T17:00"));
+    expect(calendario.sumarMinutosHabiles(bogota("2026-11-09T16:50"), 10)).toEqual(
+      bogota("2026-11-09T17:00"),
+    );
   });
 
   it("RN-05 cambio de año salta el 1 de enero festivo", () => {
     // Jueves 31 de diciembre de 2026, 16:58 → viernes 1 de enero es festivo → sábado 2.
-    expect(calendario.sumarMinutosHabiles(bogota("2026-12-31T16:58"), 10)).toEqual(bogota("2027-01-02T08:08"));
+    expect(calendario.sumarMinutosHabiles(bogota("2026-12-31T16:58"), 10)).toEqual(
+      bogota("2027-01-02T08:08"),
+    );
   });
 
   it("RN-05 sumar cero minutos en un momento inhábil lleva a la siguiente apertura", () => {
@@ -118,18 +154,34 @@ describe("Validación del horario", () => {
 
   it("rechaza franjas traslapadas", () => {
     expect(
-      () => new Calendario({ ...base, horario: { 1: [{ inicio: "08:00", fin: "12:00" }, { inicio: "11:00", fin: "17:00" }] } }),
+      () =>
+        new Calendario({
+          ...base,
+          horario: {
+            1: [
+              { inicio: "08:00", fin: "12:00" },
+              { inicio: "11:00", fin: "17:00" },
+            ],
+          },
+        }),
     ).toThrow(/traslapadas/);
   });
 
   it("rechaza un horario sin ninguna franja al buscar la apertura", () => {
-    expect(() => new Calendario({ ...base, horario: {} }).inicioEfectivo(new Date())).toThrow(/ninguna franja/);
+    expect(() => new Calendario({ ...base, horario: {} }).inicioEfectivo(new Date())).toThrow(
+      /ninguna franja/,
+    );
   });
 
   it("franjas partidas: el corte antes del almuerzo pasa a la tarde", () => {
     const partido = new Calendario({
       ...base,
-      horario: { 1: [{ inicio: "08:00", fin: "12:00" }, { inicio: "14:00", fin: "18:00" }] },
+      horario: {
+        1: [
+          { inicio: "08:00", fin: "12:00" },
+          { inicio: "14:00", fin: "18:00" },
+        ],
+      },
     });
     expect(partido.inicioEfectivo(bogota("2026-11-09T11:55"))).toEqual(bogota("2026-11-09T14:00"));
   });
@@ -143,9 +195,24 @@ describe("D-18 festivos de Colombia", () => {
 
   it("los 18 festivos de 2026", () => {
     expect(festivosColombia(2026)).toEqual([
-      "2026-01-01", "2026-01-12", "2026-03-23", "2026-04-02", "2026-04-03", "2026-05-01",
-      "2026-05-18", "2026-06-08", "2026-06-15", "2026-06-29", "2026-07-20", "2026-08-07",
-      "2026-08-17", "2026-10-12", "2026-11-02", "2026-11-16", "2026-12-08", "2026-12-25",
+      "2026-01-01",
+      "2026-01-12",
+      "2026-03-23",
+      "2026-04-02",
+      "2026-04-03",
+      "2026-05-01",
+      "2026-05-18",
+      "2026-06-08",
+      "2026-06-15",
+      "2026-06-29",
+      "2026-07-20",
+      "2026-08-07",
+      "2026-08-17",
+      "2026-10-12",
+      "2026-11-02",
+      "2026-11-16",
+      "2026-12-08",
+      "2026-12-25",
     ]);
   });
 });

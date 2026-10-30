@@ -18,7 +18,7 @@ Cierra #
 ## Lista de chequeo
 
 - [ ] La rama sale de `dev` y el PR va contra `dev`
-- [ ] `npm run lint`, `npm run typecheck` y `npm test` pasan en local
+- [ ] `npm run format:check`, `npm run lint`, `npm run typecheck` y `npm test` pasan en local
 - [ ] Solo toca las carpetas que le asigna su issue
 - [ ] Toda regla RN nueva o modificada tiene prueba que empieza con su identificador
 - [ ] No hay valores de negocio en el código (se leen con Parametros.obtener)
