@@ -17,6 +17,8 @@ concurrency:
 
 jobs:
   imagen:
+    # workflow_dispatch se puede lanzar desde cualquier rama; solo main publica y despliega.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -42,7 +44,7 @@ jobs:
 
   desplegar:
     needs: imagen
-    if: vars.DESPLIEGUE_ACTIVO == 'true'
+    if: github.ref == 'refs/heads/main' && vars.DESPLIEGUE_ACTIVO == 'true'
     runs-on: ubuntu-latest
     environment: production
     steps:
