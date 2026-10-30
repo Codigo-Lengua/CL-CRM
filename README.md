@@ -62,6 +62,7 @@ src/
     sla/         vencimiento y escalamiento (RN-14 en adelante)
     parametros/  parámetros, diccionarios y plantilla por sector (RN-01)
     marca/       colores, fuentes y logos por organización, con contraste AA
+    empresas/    empresas y contactos: duplicados, no contactar y supresión (RN-07 a RN-09, RN-47)
 docs/
   decisiones/ registro de decisiones con fecha, quién y por qué
 ```

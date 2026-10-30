@@ -99,6 +99,8 @@ model Organization {
   valoresCatalogo     ValorCatalogo[]
   canalesEnvio        CanalEnvio[]
   festivos            Festivo[]
+  empresas            Empresa[]
+  contactos           Contacto[]
 
   @@unique([slug])
   @@map("organization")
