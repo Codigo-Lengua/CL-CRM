@@ -13,13 +13,13 @@ Antes de contribuir, lee el [flujo de trabajo](docs/flujo-de-trabajo.md). En res
 
 ## Comandos
 
-| Comando | Qué hace |
-| --- | --- |
-| `npm run dev` | Servidor de desarrollo en http://localhost:3000 |
-| `npm test` | Pruebas de las reglas de negocio (Vitest) |
-| `npm run typecheck` | Revisión de tipos |
-| `npm run lint` | Revisión de estilo |
-| `npm run build` | Compila la versión de producción |
+| Comando                      | Qué hace                                        |
+| ---------------------------- | ----------------------------------------------- |
+| `npm run dev`                | Servidor de desarrollo en http://localhost:3000 |
+| `npm test`                   | Pruebas de las reglas de negocio (Vitest)       |
+| `npm run typecheck`          | Revisión de tipos                               |
+| `npm run lint`               | Revisión de estilo                              |
+| `npm run build`              | Compila la versión de producción                |
 | `npm run ventana-despliegue` | Indica si ahora se puede desplegar a producción |
 
 ## Estructura

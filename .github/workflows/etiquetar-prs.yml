@@ -24,6 +24,7 @@ jobs:
               "hotfix/": "bug",
               "docs/": "documentacion",
               "diseno/": "diseno",
+              "ci/": "ci",
             };
             const prefijo = Object.keys(etiquetas).find((p) => rama.startsWith(p));
             if (!prefijo) {

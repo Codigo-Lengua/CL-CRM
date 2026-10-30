@@ -10,7 +10,14 @@ export function calendarioCodigoLengua(anios: number[]): ConfiguracionCalendario
   const semana = [{ inicio: "08:00", fin: "17:00" }];
   return {
     zonaHoraria: "America/Bogota",
-    horario: { 1: semana, 2: semana, 3: semana, 4: semana, 5: semana, 6: [{ inicio: "08:00", fin: "13:00" }] },
+    horario: {
+      1: semana,
+      2: semana,
+      3: semana,
+      4: semana,
+      5: semana,
+      6: [{ inicio: "08:00", fin: "13:00" }],
+    },
     festivos: anios.flatMap(festivosColombia),
     minutosCorteCierre: 10,
   };

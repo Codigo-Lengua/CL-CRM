@@ -135,7 +135,11 @@ export class Calendario {
   siguienteApertura(instante: Date): Date {
     const local = new TZDate(instante.getTime(), this.zonaHoraria);
     for (let desfase = 0; desfase <= DIAS_MAXIMOS_BUSQUEDA; desfase++) {
-      for (const franja of this.franjasDelDia(local.getFullYear(), local.getMonth(), local.getDate() + desfase)) {
+      for (const franja of this.franjasDelDia(
+        local.getFullYear(),
+        local.getMonth(),
+        local.getDate() + desfase,
+      )) {
         if (franja.inicio > instante) return franja.inicio;
       }
     }
