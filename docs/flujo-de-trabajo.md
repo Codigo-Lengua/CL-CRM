@@ -133,7 +133,7 @@ Corre **solo** en los PR de `dev` a `main`. Ningún paso se puede saltar para fu
 | Migraciones          | Se aplican con `prisma migrate deploy` sobre PostgreSQL limpio           | Activo                                    |
 | Integración          | Pruebas `*.int.test.ts` contra PostgreSQL (aislamiento por organización) | Activo                                    |
 | Fronteras de módulos | Ningún módulo importa el interior de otro                                | Con el segundo módulo con infraestructura |
-| Flujos completos     | Playwright sobre PostgreSQL de prueba                                    | Corte 2                                   |
+| Flujos completos     | Playwright sobre el build y PostgreSQL de prueba (`npm run test:e2e`)    | Activo                                    |
 | Contrato de la API   | oasdiff contra la versión publicada                                      | Etapa 2                                   |
 
 **Estilo y formato.** Prettier (con `prettier-plugin-tailwindcss`, que ordena las clases) da el formato y ESLint revisa el código: la configuración de Next, reglas de `typescript-eslint` que usan los tipos (promesas sin `await`, `switch` incompletos, imports de tipos) y `eslint-config-prettier` para que no choquen. `.editorconfig` fija UTF-8, LF y dos espacios. Husky corre `lint-staged` antes de cada commit: formatea y revisa solo los archivos que cambian. `npm run format` formatea todo el repositorio.
