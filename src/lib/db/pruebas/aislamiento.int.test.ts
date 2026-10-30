@@ -4,14 +4,14 @@ import { conOrganizacion, db, dbPlataforma, ErrorSinOrganizacion } from "..";
 
 // Prueba de integración: necesita PostgreSQL con las migraciones aplicadas (npm run test:integracion).
 const plataforma = dbPlataforma();
-const orgA = `org-a-${randomUUID()}`;
-const orgB = `org-b-${randomUUID()}`;
+const orgA = randomUUID();
+const orgB = randomUUID();
 
 beforeAll(async () => {
   await plataforma.organization.createMany({
     data: [
-      { id: orgA, name: "Organización A", slug: orgA },
-      { id: orgB, name: "Organización B", slug: orgB },
+      { id: orgA, name: "Organización A", slug: `org-a-${orgA}`, createdAt: new Date() },
+      { id: orgB, name: "Organización B", slug: `org-b-${orgB}`, createdAt: new Date() },
     ],
   });
 });
@@ -91,7 +91,9 @@ describe("RN-02 aislamiento por organización", () => {
   });
 
   it("RN-02 un include desde la organización no trae datos de otra", async () => {
-    await conOrganizacion(orgB, () => db().auditoria.create({ data: { accion: "CREAR", entidad: "Secreto" } }));
+    await conOrganizacion(orgB, () =>
+      db().auditoria.create({ data: { accion: "CREAR", entidad: "Secreto" } }),
+    );
     const conAuditorias = await conOrganizacion(orgA, () =>
       db().organization.findUnique({ where: { id: orgB }, include: { auditorias: true } }),
     );
@@ -107,16 +109,22 @@ describe("RN-02 aislamiento por organización", () => {
         }),
       ),
     ).rejects.toThrow();
-    const anidados = await plataforma.auditoria.count({ where: { organizacionId: orgB, entidad: "Anidado" } });
+    const anidados = await plataforma.auditoria.count({
+      where: { organizacionId: orgB, entidad: "Anidado" },
+    });
     expect(anidados).toBe(0);
   });
 
   it("RN-02 crear o borrar organizaciones solo se permite desde la plataforma", async () => {
-    await expect(conOrganizacion(orgA, () => db().organization.delete({ where: { id: orgA } }))).rejects.toThrow(
-      /plataforma/,
-    );
     await expect(
-      conOrganizacion(orgA, () => db().organization.create({ data: { id: randomUUID(), name: "X", slug: randomUUID() } })),
+      conOrganizacion(orgA, () => db().organization.delete({ where: { id: orgA } })),
+    ).rejects.toThrow(/plataforma/);
+    await expect(
+      conOrganizacion(orgA, () =>
+        db().organization.create({
+          data: { id: randomUUID(), name: "X", slug: randomUUID(), createdAt: new Date() },
+        }),
+      ),
     ).rejects.toThrow(/plataforma/);
   });
 
