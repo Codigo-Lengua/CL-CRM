@@ -91,7 +91,9 @@ describe("RN-02 aislamiento por organización", () => {
   });
 
   it("RN-02 un include desde la organización no trae datos de otra", async () => {
-    await conOrganizacion(orgB, () => db().auditoria.create({ data: { accion: "CREAR", entidad: "Secreto" } }));
+    await conOrganizacion(orgB, () =>
+      db().auditoria.create({ data: { accion: "CREAR", entidad: "Secreto" } }),
+    );
     const conAuditorias = await conOrganizacion(orgA, () =>
       db().organization.findUnique({ where: { id: orgB }, include: { auditorias: true } }),
     );
@@ -107,16 +109,20 @@ describe("RN-02 aislamiento por organización", () => {
         }),
       ),
     ).rejects.toThrow();
-    const anidados = await plataforma.auditoria.count({ where: { organizacionId: orgB, entidad: "Anidado" } });
+    const anidados = await plataforma.auditoria.count({
+      where: { organizacionId: orgB, entidad: "Anidado" },
+    });
     expect(anidados).toBe(0);
   });
 
   it("RN-02 crear o borrar organizaciones solo se permite desde la plataforma", async () => {
-    await expect(conOrganizacion(orgA, () => db().organization.delete({ where: { id: orgA } }))).rejects.toThrow(
-      /plataforma/,
-    );
     await expect(
-      conOrganizacion(orgA, () => db().organization.create({ data: { id: randomUUID(), name: "X", slug: randomUUID() } })),
+      conOrganizacion(orgA, () => db().organization.delete({ where: { id: orgA } })),
+    ).rejects.toThrow(/plataforma/);
+    await expect(
+      conOrganizacion(orgA, () =>
+        db().organization.create({ data: { id: randomUUID(), name: "X", slug: randomUUID() } }),
+      ),
     ).rejects.toThrow(/plataforma/);
   });
 
