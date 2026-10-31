@@ -3,6 +3,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { Parametros } from "../aplicacion/parametros";
 import { DEFINICIONES, esClave } from "../dominio/definiciones";
 import { type Plantilla, PLANTILLA_CODIGO_LENGUA, type TipoCatalogo } from "../dominio/plantilla";
+import { asegurarEtapas } from "@/modules/embudo/infraestructura/prisma";
 
 const global = globalThis as unknown as { __parametros?: Parametros };
 
@@ -43,5 +44,6 @@ export async function aplicarPlantilla(plantilla: Plantilla = PLANTILLA_CODIGO_L
   await cliente.configuracion.createMany({ data: configuracion, skipDuplicates: true });
   await cliente.valorCatalogo.createMany({ data: catalogos, skipDuplicates: true });
   await cliente.canalEnvio.createMany({ data: canales, skipDuplicates: true });
+  await asegurarEtapas();
   parametros().invalidar(organizacionId);
 }

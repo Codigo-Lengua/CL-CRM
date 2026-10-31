@@ -101,6 +101,9 @@ model Organization {
   festivos            Festivo[]
   empresas            Empresa[]
   contactos           Contacto[]
+  etapasEmbudo        EtapaEmbudo[]
+  negocios            Negocio[]
+  historialEtapas     HistorialEtapa[]
 
   @@unique([slug])
   @@map("organization")

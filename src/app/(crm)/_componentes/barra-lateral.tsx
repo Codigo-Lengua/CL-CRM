@@ -17,7 +17,10 @@ const SECCIONES: Seccion[] = [
   { enlaces: [{ href: "/", nombre: "Inicio" }] },
   {
     titulo: "Comercial",
-    enlaces: [{ href: "/empresas", nombre: "Empresas", permiso: "empresas.ver_editar" }],
+    enlaces: [
+      { href: "/empresas", nombre: "Empresas", permiso: "empresas.ver_editar" },
+      { href: "/negocios", nombre: "Negocios", permiso: "negocios.mover" },
+    ],
   },
   {
     titulo: "Configuración",

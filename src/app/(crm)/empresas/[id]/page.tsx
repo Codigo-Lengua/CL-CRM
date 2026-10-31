@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { type ReactNode, Suspense } from "react";
 import {
@@ -11,12 +12,15 @@ import {
   Tarjeta,
 } from "@/components/ui";
 import { puede } from "@/lib/permisos";
+import { negociosDeEmpresa } from "@/modules/embudo/aplicacion/negocios";
 import { obtenerEmpresa } from "@/modules/empresas/aplicacion/empresas";
 import { puedeContactar } from "@/modules/empresas/dominio/contactabilidad";
 import { opcionesEmpresa } from "@/modules/empresas/infraestructura/prisma";
 import { InsigniasEstado } from "../insignias";
 import { comoActor } from "../sesion-comercial";
+import { actorDe } from "../../negocios/sesion-embudo";
 import { BotonNoContactar, BotonSuprimir, FormularioContacto } from "./acciones-ficha";
+import { FormularioNegocio } from "./negocios-empresa";
 
 export const metadata: Metadata = { title: "Empresa" };
 
@@ -35,12 +39,16 @@ function Dato({ etiqueta, children }: { etiqueta: string; children: ReactNode })
 
 async function Ficha({ params }: Props) {
   const { id } = await params;
-  const resultado = await comoActor(async (actor, contexto) => ({
-    empresa: await obtenerEmpresa(actor, id),
-    opciones: await opcionesEmpresa(contexto.organizacionId),
-  }));
+  const resultado = await comoActor(async (actor, contexto) => {
+    const actorEmbudo = actorDe(contexto);
+    return {
+      empresa: await obtenerEmpresa(actor, id),
+      opciones: await opcionesEmpresa(contexto.organizacionId),
+      negocios: actorEmbudo ? await negociosDeEmpresa(actorEmbudo, id) : null,
+    };
+  });
   if (!resultado) return <SinPermiso texto="Tu rol no tiene acceso a las empresas." />;
-  const { empresa, opciones } = resultado.valor;
+  const { empresa, opciones, negocios } = resultado.valor;
   if (!empresa) notFound();
 
   const esAdmin = puede(resultado.contexto.rol, "configuracion.administrar");
@@ -131,6 +139,41 @@ async function Ficha({ params }: Props) {
           ) : null}
         </Tarjeta>
       </div>
+
+      {negocios ? (
+        <Tarjeta className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-semibold">Negocios</h2>
+            {suprimida ? null : <FormularioNegocio empresaId={empresa.id} />}
+          </div>
+          {negocios.length === 0 ? (
+            <p className="text-sm text-texto-suave">
+              Sin negocios. Crea uno cuando haya una oportunidad concreta.
+            </p>
+          ) : (
+            <ul className="divide-y divide-borde">
+              {negocios.map((n) => (
+                <li key={n.id} className="flex items-center justify-between gap-2 py-2">
+                  <Link href={`/negocios/${n.id}`} className="font-medium text-enlace hover:underline">
+                    {n.nombre}
+                  </Link>
+                  <Insignia
+                    tono={
+                      n.etapa.tipoSistema === "PERDIDA"
+                        ? "peligro"
+                        : n.etapa.tipoSistema === "ABIERTA"
+                          ? "primario"
+                          : "exito"
+                    }
+                  >
+                    {n.etapa.nombre}
+                  </Insignia>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Tarjeta>
+      ) : null}
 
       <Tarjeta className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
