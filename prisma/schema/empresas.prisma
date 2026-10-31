@@ -58,6 +58,7 @@ model Empresa {
   notas              String?
   suprimidaEn        DateTime?      @map("suprimida_en")
   contactos          Contacto[]
+  negocios           Negocio[]
   creadoEn           DateTime       @default(now()) @map("creado_en")
   actualizadoEn      DateTime       @updatedAt @map("actualizado_en")
 

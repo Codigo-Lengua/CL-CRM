@@ -1,0 +1,89 @@
+// Embudo comercial (CL-CRM-04 §4.6): etapas por organización, negocios e historial.
+
+/// Lo que entienden las reglas; el nombre de cada etapa lo pone la organización.
+enum TipoEtapa {
+  ABIERTA
+  GANADA
+  ENTREGADA
+  PERDIDA
+}
+
+/// Etapa parametrizable del embudo.
+model EtapaEmbudo {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizacionId String           @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion   Organization     @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  /// Identificador estable de la plantilla; las etapas que agrega la organización no lo tienen.
+  codigo         String?
+  nombre         String
+  orden          Int
+  tipoSistema    TipoEtapa        @map("tipo_sistema")
+  /// Última etapa abierta a la que llega el asesor (RN-21). Solo una por organización.
+  limiteAsesor   Boolean          @default(false) @map("limite_asesor")
+  probabilidad   Int              @default(0)
+  activo         Boolean          @default(true)
+  negocios       Negocio[]
+  desde          HistorialEtapa[] @relation("EtapaOrigen")
+  hacia          HistorialEtapa[] @relation("EtapaDestino")
+  creadoEn       DateTime         @default(now()) @map("creado_en")
+  actualizadoEn  DateTime         @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, id])
+  @@unique([organizacionId, codigo])
+  @@index([organizacionId, orden])
+  @@map("etapa_embudo")
+}
+
+/// Oportunidad de venta con una empresa.
+model Negocio {
+  id              String           @id @default(uuid()) @db.Uuid
+  organizacionId  String           @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion    Organization     @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  empresaId       String           @map("empresa_id") @db.Uuid
+  empresa         Empresa          @relation(fields: [organizacionId, empresaId], references: [organizacionId, id], onDelete: Cascade)
+  /// Dueño del negocio (user.id). Sin relación: user es tabla de plataforma.
+  asesorId        String?          @map("asesor_id") @db.Uuid
+  nombre          String
+  etapaId         String           @map("etapa_id") @db.Uuid
+  etapa           EtapaEmbudo      @relation(fields: [organizacionId, etapaId], references: [organizacionId, id], onDelete: NoAction)
+  etapaDesde      DateTime         @default(now()) @map("etapa_desde")
+  valorEstimado   Decimal?         @map("valor_estimado") @db.Decimal(14, 2)
+  cierreEstimado  DateTime?        @map("cierre_estimado") @db.Date
+  /// MOTIVO_PERDIDA del diccionario; obligatorio en etapas PERDIDA (RN-22).
+  motivoPerdidaId String?          @map("motivo_perdida_id") @db.Uuid
+  motivoPerdida   ValorCatalogo?   @relation("MotivoPerdida", fields: [organizacionId, motivoPerdidaId], references: [organizacionId, id], onDelete: NoAction)
+  ganadoEn        DateTime?        @map("ganado_en")
+  entregadoEn     DateTime?        @map("entregado_en")
+  perdidoEn       DateTime?        @map("perdido_en")
+  historial       HistorialEtapa[]
+  creadoEn        DateTime         @default(now()) @map("creado_en")
+  actualizadoEn   DateTime         @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, id])
+  @@index([organizacionId, etapaId])
+  @@index([organizacionId, empresaId])
+  @@index([organizacionId, asesorId])
+  @@map("negocio")
+}
+
+/// Cada cambio de etapa: de dónde, a dónde, quién y por qué (RN-25).
+model HistorialEtapa {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizacionId String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion   Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  negocioId      String       @map("negocio_id") @db.Uuid
+  negocio        Negocio      @relation(fields: [organizacionId, negocioId], references: [organizacionId, id], onDelete: Cascade)
+  /// Vacío cuando el negocio nace.
+  etapaOrigenId  String?      @map("etapa_origen_id") @db.Uuid
+  etapaOrigen    EtapaEmbudo? @relation("EtapaOrigen", fields: [organizacionId, etapaOrigenId], references: [organizacionId, id], onDelete: NoAction)
+  etapaDestinoId String       @map("etapa_destino_id") @db.Uuid
+  etapaDestino   EtapaEmbudo  @relation("EtapaDestino", fields: [organizacionId, etapaDestinoId], references: [organizacionId, id], onDelete: NoAction)
+  usuarioId      String?      @map("usuario_id") @db.Uuid
+  motivo         String?
+  cambiadoEn     DateTime     @default(now()) @map("cambiado_en")
+  creadoEn       DateTime     @default(now()) @map("creado_en")
+  actualizadoEn  DateTime     @updatedAt @map("actualizado_en")
+
+  @@index([organizacionId, negocioId, cambiadoEn])
+  @@map("historial_etapa")
+}
