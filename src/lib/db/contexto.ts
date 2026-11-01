@@ -4,7 +4,11 @@ interface ContextoOrganizacion {
   organizacionId: string;
 }
 
-const almacen = new AsyncLocalStorage<ContextoOrganizacion>();
+// Un solo almacén por proceso: Next.js empaqueta páginas y endpoints por separado, y el
+// cliente de db() se guarda en globalThis. Si cada paquete tuviera su propio almacén, el
+// cliente creado por una página no vería la organización que activa un endpoint.
+const global = globalThis as unknown as { __almacenOrganizacion?: AsyncLocalStorage<ContextoOrganizacion> };
+const almacen = (global.__almacenOrganizacion ??= new AsyncLocalStorage<ContextoOrganizacion>());
 
 /** Error de RN-02: se intentó leer o escribir datos de negocio sin organización activa. */
 export class ErrorSinOrganizacion extends Error {

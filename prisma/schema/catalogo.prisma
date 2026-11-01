@@ -1,0 +1,146 @@
+// Catálogo, precios e impuestos (CL-CRM-04 §4.3).
+
+enum TipoServicio {
+  PROYECTO
+  MENSUAL
+}
+
+enum Periodicidad {
+  UNICO
+  MENSUAL
+  ANUAL
+}
+
+/// TRASLADADO se suma al total; RETENIDO se resta.
+enum TipoImpuesto {
+  TRASLADADO
+  RETENIDO
+}
+
+/// Servicio que se vende. Único por (organización, código).
+model Servicio {
+  id                       String             @id @default(uuid()) @db.Uuid
+  organizacionId           String             @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion             Organization       @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  codigo                   String
+  nombre                   String
+  lineaId                  String?            @map("linea_id") @db.Uuid
+  linea                    ValorCatalogo?     @relation("LineaServicio", fields: [organizacionId, lineaId], references: [organizacionId, id], onDelete: NoAction)
+  tipo                     TipoServicio
+  /// Qué incluye; va en el PDF de la cotización.
+  incluye                  String?
+  entregaDias              Int?               @map("entrega_dias")
+  horas                    Int?
+  visibleWeb               Boolean            @default(true) @map("visible_web")
+  /// Sin precio automático: la solicitud va directo al asesor (RN-34).
+  requiereCotizacionManual Boolean            @default(false) @map("requiere_cotizacion_manual")
+  activo                   Boolean            @default(true)
+  planes                   Plan[]
+  precios                  Precio[]
+  costos                   CostoTerceros[]
+  impuestos                ServicioImpuesto[]
+  creadoEn                 DateTime           @default(now()) @map("creado_en")
+  actualizadoEn            DateTime           @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, id])
+  @@unique([organizacionId, codigo])
+  @@map("servicio")
+}
+
+/// Variante de un servicio mensual (por ejemplo, bot Básico, Estándar o Pro).
+model Plan {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizacionId String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion   Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  servicioId     String       @map("servicio_id") @db.Uuid
+  servicio       Servicio     @relation(fields: [organizacionId, servicioId], references: [organizacionId, id], onDelete: Cascade)
+  nombre         String
+  limiteUso      Int?         @map("limite_uso")
+  activo         Boolean      @default(true)
+  precios        Precio[]
+  creadoEn       DateTime     @default(now()) @map("creado_en")
+  actualizadoEn  DateTime     @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, id])
+  @@map("plan")
+}
+
+/// Precio con vigencia; nunca se sobrescribe. Las vigencias de un mismo servicio o plan no se
+/// traslapan: lo garantiza una restricción de exclusión escrita a mano en la migración (RN-27).
+model Precio {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizacionId String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion   Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  /// Exactamente uno de servicioId o planId.
+  servicioId     String?      @map("servicio_id") @db.Uuid
+  servicio       Servicio?    @relation(fields: [organizacionId, servicioId], references: [organizacionId, id], onDelete: Cascade)
+  planId         String?      @map("plan_id") @db.Uuid
+  plan           Plan?        @relation(fields: [organizacionId, planId], references: [organizacionId, id], onDelete: Cascade)
+  valor          Decimal      @db.Decimal(14, 2)
+  vigenteDesde   DateTime     @map("vigente_desde") @db.Date
+  /// Último día de vigencia, inclusive. Vacío = vigente sin fecha de fin.
+  vigenteHasta   DateTime?    @map("vigente_hasta") @db.Date
+  usuarioId      String?      @map("usuario_id") @db.Uuid
+  creadoEn       DateTime     @default(now()) @map("creado_en")
+  actualizadoEn  DateTime     @updatedAt @map("actualizado_en")
+
+  @@index([organizacionId, servicioId, vigenteDesde])
+  @@index([organizacionId, planId, vigenteDesde])
+  @@map("precio")
+}
+
+/// Costo que pagamos a terceros por un servicio. Nunca se muestra al cliente ni al asesor.
+model CostoTerceros {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizacionId String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion   Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  servicioId     String       @map("servicio_id") @db.Uuid
+  servicio       Servicio     @relation(fields: [organizacionId, servicioId], references: [organizacionId, id], onDelete: Cascade)
+  concepto       String
+  valor          Decimal      @db.Decimal(14, 2)
+  periodicidad   Periodicidad
+  creadoEn       DateTime     @default(now()) @map("creado_en")
+  actualizadoEn  DateTime     @updatedAt @map("actualizado_en")
+
+  @@index([organizacionId, servicioId])
+  @@map("costo_terceros")
+}
+
+/// Impuesto parametrizable por organización (IVA, ICA, retención…).
+model Impuesto {
+  id               String             @id @default(uuid()) @db.Uuid
+  organizacionId   String             @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion     Organization       @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  codigo           String
+  nombre           String
+  tipo             TipoImpuesto
+  porcentaje       Decimal            @db.Decimal(6, 3)
+  /// El precio del catálogo ya lo incluye: se separa de la base (RN-30).
+  incluidoEnPrecio Boolean            @default(false) @map("incluido_en_precio")
+  vigenteDesde     DateTime           @map("vigente_desde") @db.Date
+  vigenteHasta     DateTime?          @map("vigente_hasta") @db.Date
+  activo           Boolean            @default(true)
+  servicios        ServicioImpuesto[]
+  creadoEn         DateTime           @default(now()) @map("creado_en")
+  actualizadoEn    DateTime           @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, id])
+  @@unique([organizacionId, codigo])
+  @@map("impuesto")
+}
+
+/// Impuestos que aplican a cada servicio.
+model ServicioImpuesto {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizacionId String       @default(dbgenerated("(current_setting('app.organizacion_id'::text, true))::uuid")) @map("organizacion_id") @db.Uuid
+  organizacion   Organization @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  servicioId     String       @map("servicio_id") @db.Uuid
+  servicio       Servicio     @relation(fields: [organizacionId, servicioId], references: [organizacionId, id], onDelete: Cascade)
+  impuestoId     String       @map("impuesto_id") @db.Uuid
+  impuesto       Impuesto     @relation(fields: [organizacionId, impuestoId], references: [organizacionId, id], onDelete: Cascade)
+  creadoEn       DateTime     @default(now()) @map("creado_en")
+  actualizadoEn  DateTime     @updatedAt @map("actualizado_en")
+
+  @@unique([organizacionId, servicioId, impuestoId])
+  @@map("servicio_impuesto")
+}

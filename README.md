@@ -64,6 +64,7 @@ src/
     marca/       colores, fuentes y logos por organización, con contraste AA
     empresas/    empresas y contactos: duplicados, no contactar y supresión (RN-07 a RN-09, RN-47)
     embudo/      etapas por organización, negocios, transiciones por rol e historial (RN-21 a RN-26)
+    catalogo/    servicios, planes, precios con vigencia, costos e impuestos (RN-27, RN-30)
 docs/
   decisiones/ registro de decisiones con fecha, quién y por qué
 ```
