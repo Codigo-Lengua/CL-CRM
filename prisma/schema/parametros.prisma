@@ -66,6 +66,7 @@ model ValorCatalogo {
   empresasCategoria Empresa[]    @relation("CategoriaEmpresa")
   empresasFuente    Empresa[]    @relation("FuenteEmpresa")
   negociosPerdidos  Negocio[]    @relation("MotivoPerdida")
+  serviciosLinea    Servicio[]   @relation("LineaServicio")
   creadoEn          DateTime     @default(now()) @map("creado_en")
   actualizadoEn     DateTime     @updatedAt @map("actualizado_en")
 

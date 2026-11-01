@@ -104,6 +104,12 @@ model Organization {
   etapasEmbudo        EtapaEmbudo[]
   negocios            Negocio[]
   historialEtapas     HistorialEtapa[]
+  servicios           Servicio[]
+  planes              Plan[]
+  precios             Precio[]
+  costosTerceros      CostoTerceros[]
+  impuestos           Impuesto[]
+  serviciosImpuestos  ServicioImpuesto[]
 
   @@unique([slug])
   @@map("organization")

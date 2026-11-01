@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
+  // La importación del catálogo recibe archivos de hasta 5 MB por server action (el límite
+  // por omisión es 1 MB). El lector vuelve a validar el tamaño.
+  experimental: { serverActions: { bodySizeLimit: "6mb" } },
   turbopack: {
     rules: {
       "*.css": {
