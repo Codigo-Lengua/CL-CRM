@@ -59,15 +59,19 @@ export function esTraslape(error: unknown): boolean {
 export const esCodigoRepetido = (error: unknown) =>
   error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
 
-export async function auditar(registro: {
-  usuarioId: string;
-  accion: string;
-  entidad: "servicio" | "plan" | "precio" | "costo_terceros" | "impuesto";
-  entidadId: string;
-  antes?: unknown;
-  despues?: unknown;
-}) {
-  await db().auditoria.create({
+export async function auditar(
+  registro: {
+    usuarioId: string;
+    accion: string;
+    entidad: "servicio" | "plan" | "precio" | "costo_terceros" | "impuesto";
+    entidadId: string;
+    antes?: unknown;
+    despues?: unknown;
+  },
+  /** Dentro de una transacción, su cliente: la auditoría se revierte con ella. */
+  cliente: Pick<ReturnType<typeof db>, "auditoria"> = db(),
+) {
+  await cliente.auditoria.create({
     data: {
       ...registro,
       antes: (registro.antes ?? undefined) as Prisma.InputJsonValue | undefined,

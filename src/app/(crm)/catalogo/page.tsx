@@ -31,10 +31,19 @@ async function Lista() {
         titulo="El catálogo está vacío"
         detalle={
           acceso.edita
-            ? "Agrega el primer servicio con su precio."
+            ? "Carga tu catálogo desde Excel, CSV o PDF, o agrega el primer servicio a mano."
             : "La administración aún no ha cargado servicios."
         }
-        accion={acceso.edita ? <BotonEnlace href="/catalogo/nuevo">Nuevo servicio</BotonEnlace> : null}
+        accion={
+          acceso.edita ? (
+            <div className="flex flex-wrap justify-center gap-2">
+              <BotonEnlace variante="secundario" href="/catalogo/importar">
+                Importar desde archivo
+              </BotonEnlace>
+              <BotonEnlace href="/catalogo/nuevo">Nuevo servicio</BotonEnlace>
+            </div>
+          ) : null
+        }
       />
     );
   }
@@ -104,6 +113,9 @@ async function Acciones() {
     <div className="flex gap-2">
       <BotonEnlace variante="secundario" href="/catalogo/impuestos">
         Impuestos
+      </BotonEnlace>
+      <BotonEnlace variante="secundario" href="/catalogo/importar">
+        Importar
       </BotonEnlace>
       <BotonEnlace href="/catalogo/nuevo">Nuevo servicio</BotonEnlace>
     </div>
